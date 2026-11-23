@@ -9,7 +9,7 @@ const GROUPS={base:'Базовые',prac:'Практика',job:'Как на р�
 const norm=s=>String(s).trim().replace(/[“”«»]/g,'"').replace(/’/g,"'").replace(/\s+/g,' ').replace(/\s*;$/,'');
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 function exHTML(x,i,state){
-  const [tn,tc]=TYPES[x.t];const mix=x.ref?` <a class="ref" href="#/m/${x.ref}">↺ ${MODS[x.ref]?MODS[x.ref].title:x.ref}</a>`:'';
+  const [tn,tc]=TYPES[x.t];const mix=x.ref?` <a class="ref" href="#m-${x.ref}">↺ ${MODS[x.ref]?MODS[x.ref].title:x.ref}</a>`:'';
   let body='';
   if(x.t==='c'||x.t==='r'){const ord=shuffle(x.o.map((_,k)=>k));body=`<div class="opts">${ord.map(k=>`<button class="opt" data-k="${k}">${x.o[k]}</button>`).join('')}</div>`}
   if(x.t==='i')body=`<div class="inrow"><span class="k-pr">${x.fix?'✎':'$'}</span><input class="inp" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="${esc(x.ph||'')}"><button class="go">Проверить</button></div>`;

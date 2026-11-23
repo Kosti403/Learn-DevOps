@@ -5,7 +5,7 @@ Linux → Docker → Kubernetes → CI/CD → Terraform → Собес. Соби
 
 ## Команды
 ```bash
-npm run build   # src/ → index.html
+npm run build   # src/ → index.html + artifact.html (публикуется: https://claude.ai/artifact/WcGVCuJ5wm6gjfoRzZmtUm)
 npm run check   # сборка + проверка данных (пояснения, верные варианты, ссылки ↺ только назад, «странные» теги)
 npm run map     # карта курса
 ```

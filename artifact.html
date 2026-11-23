@@ -1,0 +1,605 @@
+<title>DevOps по-тихому</title><style>:root{color-scheme:dark;--bg:#0f1417;--pn:#161d21;--pn2:#1d262b;--ln:#2a363d;--tx:#d7e0e4;--mu:#8a9aa2;--ac:#4fd18b;
+--c:#5aa9ff;--i:#f2c94c;--s:#b48cff;--r:#3dd6c6;--mix:#ff9f5a;--ok:#4fd18b;--no:#ff6b6b;
+--k-cmd:#4fd18b;--k-flag:#f2c94c;--k-path:#5aa9ff;--k-var:#ff9f5a;--k-str:#e6a6ff;--k-com:#6f8088;--k-op:#ff6b9a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;min-height:100vh}
+a{color:var(--c)}
+#side{width:290px;flex:none;background:var(--pn);border-right:1px solid var(--ln);height:100vh;position:sticky;top:0;overflow:auto;padding:12px 8px}
+#main{flex:1;min-width:0;max-width:900px;padding:24px 28px 80px}
+#burger{display:none}
+.sl{display:block;position:relative;padding:6px 10px 8px;border-radius:6px;color:var(--tx);text-decoration:none;font-size:14px}
+.sl:hover{background:var(--pn2)}.sl.cur{background:var(--pn2);outline:1px solid var(--ac)}
+.sl.rev{color:var(--mix)}
+.pg{position:absolute;left:10px;right:10px;bottom:3px;height:2px;background:var(--ln)}
+.pg::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--ac)}
+.cnt{color:var(--mix);font-weight:700}
+details>summary{cursor:pointer}
+#side summary{color:var(--mu);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:12px 10px 4px}
+h1{margin:.2em 0 .2em;font-size:28px}h2{font-size:21px;margin:1.4em 0 .5em}h3{font-size:17px;margin:1.2em 0 .4em}
+.sub{color:var(--mu);margin-top:0}.muted{color:var(--mu);font-size:14px}
+.lv{color:var(--ac);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+mark{background:none;color:var(--i);font-weight:600}
+code{font:14px/1.4 ui-monospace,Consolas,monospace;background:var(--pn2);padding:1px 5px;border-radius:4px}
+pre.code{font:14px/1.5 ui-monospace,Consolas,monospace;background:#0a0e10;border:1px solid var(--ln);border-radius:8px;padding:12px 14px;overflow:auto;white-space:pre}
+.k-cmd{color:var(--k-cmd);font-weight:600}.k-flag{color:var(--k-flag)}.k-path{color:var(--k-path)}.k-var{color:var(--k-var)}.k-str{color:var(--k-str)}.k-com{color:var(--k-com)}.k-op{color:var(--k-op)}
+.k-pr{color:var(--mu);user-select:none}.k-outl{color:#aab6bc}
+.tw{overflow:auto}table{border-collapse:collapse;width:100%;font-size:15px;margin:.6em 0}
+th,td{border:1px solid var(--ln);padding:6px 9px;text-align:left;vertical-align:top}th{background:var(--pn2)}
+table.cmds td:first-child{white-space:nowrap;width:1%}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--ln);margin:14px 0 6px;overflow:auto}
+.tabs a{padding:8px 14px;color:var(--mu);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs a.on{color:var(--tx);border-color:var(--ac)}
+.intro{background:var(--pn);border-left:3px solid var(--ac);padding:2px 18px 10px;border-radius:6px;margin-top:14px}
+.box{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--c);border-radius:8px;padding:10px 16px;margin:14px 0}
+.box>b{display:block;margin-bottom:4px}.box.warn{border-left-color:var(--i)}.box.deep{border-left-color:var(--s)}
+.traps{list-style:none;padding:0}.traps li{background:var(--pn);border-radius:8px;padding:10px 14px;margin:8px 0}
+.bad{color:var(--no)}.good{color:var(--ok)}.why{color:var(--tx);opacity:.9;margin-top:4px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:14px 0;color:var(--mu)}
+.grp{color:var(--mu);text-transform:uppercase;font-size:13px;letter-spacing:.06em;margin-top:26px}
+.ex,.lab{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--c);border-radius:10px;padding:12px 16px;margin:12px 0}
+.ex.t-i{border-left-color:var(--i)}.ex.t-s{border-left-color:var(--s)}.ex.t-r{border-left-color:var(--r)}.ex.mixd{border-left-color:var(--mix)}
+.lab{border-left-color:var(--ac)}
+.ex.ok{border-color:var(--ok)}.ex.no{border-color:var(--no)}.lab.ok{opacity:.75}
+.exh{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--mu);margin-bottom:6px;flex-wrap:wrap}
+.tag{text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.t-c .tag{color:var(--c)}.t-i .tag{color:var(--i)}.t-s .tag{color:var(--s)}.t-r .tag{color:var(--r)}.lab .tag{color:var(--ac)}
+.num{margin-left:auto}.ref{color:var(--mix);text-decoration:none}
+.opts{display:grid;gap:6px}
+button{font:inherit;cursor:pointer;color:var(--tx);background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:7px 12px}
+button:hover{border-color:var(--mu)}
+.opt{text-align:left}.opt.sel{border-color:var(--c)}
+.ex.ok .opt.sel{border-color:var(--ok);background:#173325}.ex.no .opt.sel{border-color:var(--no);background:#3a1d1f}
+.inrow{display:flex;gap:6px;align-items:center;background:#0a0e10;border:1px solid var(--ln);border-radius:8px;padding:4px 4px 4px 10px}
+.inp{flex:1;min-width:0;background:transparent;border:0;color:var(--tx);font:15px ui-monospace,Consolas,monospace;padding:6px 0;outline:0}
+.inp.wide{width:100%;border:1px solid var(--ln);border-radius:8px;padding:8px 10px;background:#0a0e10}
+.go{background:#1d3a2a;border-color:#2c5a40}
+.sline{min-height:44px;border:1px dashed var(--ln);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:5px;margin-bottom:8px;counter-reset:s}
+.spool{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font:14px ui-monospace,Consolas,monospace;text-align:left}
+.sline .chip{border-color:var(--s)}
+.sline .chip::before{counter-increment:s;content:counter(s) ". ";color:var(--mu)}
+.fb:empty{display:none}.fb{margin-top:10px;padding-top:10px;border-top:1px solid var(--ln)}
+.res{font-weight:700}.ex.ok .res{color:var(--ok)}.ex.no .res{color:var(--no)}
+.right{margin:4px 0}.fb .totodo{margin-top:8px;font-size:13px;padding:4px 10px}
+.lab details{margin-top:8px;background:var(--pn2);border-radius:6px;padding:6px 10px}
+.lab details.sol summary{color:var(--i)}
+.qa{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:10px 14px;margin:8px 0}
+.qa summary{font-weight:600}.qa>div{margin-top:8px}
+.lock{background:var(--pn);border-radius:10px;padding:18px;margin:18px 0}.lock .force{margin-top:10px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.stats div{background:var(--pn);border-radius:10px;padding:12px 16px;color:var(--mu);font-size:14px}
+.stats b{display:block;font-size:22px;color:var(--tx)}
+.btn{display:inline-block;background:#1d3a2a;border:1px solid #2c5a40;color:var(--tx);padding:9px 16px;border-radius:8px;text-decoration:none}
+.nextp{margin-top:26px}
+.todo{list-style:none;padding:0}.todo li{display:flex;justify-content:space-between;gap:10px;background:var(--pn);border-radius:8px;padding:8px 12px;margin:6px 0}
+@media(max-width:800px){
+  body{display:block}#main{padding:60px 14px 80px}
+  #side{position:fixed;z-index:9;left:0;top:0;width:86vw;max-width:330px;transform:translateX(-100%);transition:.2s}
+  body.menu #side{transform:none;box-shadow:0 0 0 100vmax #0009}
+  #burger{display:block;position:fixed;z-index:10;top:10px;left:10px}
+  h1{font-size:23px}
+}</style><button id="burger" aria-label="Меню">☰ Модули</button>
+<nav id="side"></nav>
+<main id="main"></main><script>/* Помощники для текста модулей. Всё глобально (один файл после сборки).
+   esc(s)             — экранировать HTML
+   C(code,lang)       — блок кода с раскраской. lang: 'sh' (по умолч.), 'term' ($ команда + вывод), 'out' (как есть), 'yaml', 'ps' (PowerShell)
+   c(code)            — команда в строке текста (inline)
+   tbl(head,rows)     — таблица
+   CMDS([[cmd,что делает],…]) — таблица команд с раскраской
+   TR([[ошибка,правильно,почему],…]) — ловушки
+   BOX(title,html,kind) — врезка: kind 'idea' | 'warn' | 'deep' (глубже: механизм под капотом) */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const CMDWORD=/^(sudo|time|watch|xargs|exec|env)$/;
+function hlSh(line){
+  if(/^\s*#/.test(line))return `<i class="k-com">${esc(line)}</i>`;
+  let out='',first=true,m;const re=/(\s+)|("(?:[^"\\]|\\.)*"|'[^']*')|(\|\||&&|\||;|>>|2>&1|>|<)|(#.*$)|([^\s|;&<>]+)/g;
+  while((m=re.exec(line))){
+    if(m[1]){out+=m[1];continue}
+    if(m[2]){out+=`<span class="k-str">${esc(m[2])}</span>`;continue}
+    if(m[3]){out+=`<span class="k-op">${esc(m[3])}</span>`;if(/^(\|\||&&|\||;)$/.test(m[3]))first=true;continue}
+    if(m[4]){out+=`<i class="k-com">${esc(m[4])}</i>`;continue}
+    const t=m[5];let k;
+    if(first){k='k-cmd';if(!CMDWORD.test(t)&&!/=/.test(t))first=false}
+    else if(/^-/.test(t))k='k-flag';
+    else if(/^\$/.test(t))k='k-var';
+    else if(/^(\/|~|\.\/|\.\.\/)/.test(t))k='k-path';
+    out+=k?`<span class="${k}">${esc(t)}</span>`:esc(t)}
+  return out}
+function hlYaml(line){
+  if(/^\s*#/.test(line))return `<i class="k-com">${esc(line)}</i>`;
+  const m=line.match(/^(\s*-?\s*)([\w.\-\/]+)(:)(.*)$/);
+  return m?esc(m[1])+`<span class="k-cmd">${esc(m[2])}</span>`+m[3]+`<span class="k-str">${esc(m[4])}</span>`:esc(line)}
+function C(code,lang='sh'){
+  const lines=code.replace(/^\n|\n\s*$/g,'').split('\n');
+  const body=lines.map(l=>{
+    if(lang==='term')return /^\$ /.test(l)?`<span class="k-pr">$ </span>`+hlSh(l.slice(2)):`<span class="k-outl">${esc(l)}</span>`;
+    if(lang==='out')return esc(l);
+    if(lang==='yaml')return hlYaml(l);
+    return hlSh(l)}).join('\n');
+  return `<pre class="code">${body}</pre>`}
+const c=s=>`<code>${hlSh(s)}</code>`;
+const tbl=(h,rows)=>`<div class="tw"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const CMDS=rows=>`<div class="tw"><table class="cmds"><tbody>${rows.map(([k,v])=>`<tr><td><code>${hlSh(k)}</code></td><td>${v}</td></tr>`).join('')}</tbody></table></div>`;
+const TR=rows=>`<ul class="traps">${rows.map(([w,r,y])=>`<li><div><span class="bad">✗ ${w}</span></div><div><span class="good">✓ ${r}</span></div><div class="why">${y}</div></li>`).join('')}</ul>`;
+const BOX=(t,h,k='idea')=>`<div class="box ${k}"><b>${t}</b>${h}</div>`;
+/* Реестр. Каждый файл src/modules/** вызывает MOD({...}) или REV({...}). Порядок — в course/order.js.
+   MOD({
+     id, lvl:'L1', title, sub,
+     intro:  'html — Что это и зачем (3–6 предложений)',
+     theory: 'html — суть: механизм, команды, схемы',
+     memo:   'html — Как тренировать',
+     traps:  [[ошибка, правильно, почему], …],
+     ex:     [задания — формат в engine/ex.js],
+     lab:    [{t:'задача руками', h:'подсказка', chk:'как проверить себя', sol:'решение'}],
+     qa:     [[вопрос собеса, ответ], …],
+     cheat:  [[команда, что делает], …]   — уходит в общую шпаргалку
+   }) */
+const MODS={};
+const MOD=m=>{if(MODS[m.id])throw new Error('Дубль модуля: '+m.id);MODS[m.id]=Object.assign({ex:[],lab:[],qa:[],cheat:[],traps:[]},m)};
+const REV=r=>MOD(Object.assign({review:true,lvl:'',sub:'Накопительный обзор: без подсказок, темы смешаны.'},r));
+/* files · L1 · Иерархия ФС и работа с файлами */
+MOD({id:'files',title:'Файлы и иерархия ФС',sub:'Где что лежит на сервере (/etc, /var, /opt…) и как читать, копировать, искать файлы.',
+intro:`<p>В Linux нет дисков C: и D: — есть <b>одно дерево</b>, которое растёт из корня <code>/</code>. Все диски, флешки и даже информация о процессах «подвешены» в это дерево в виде папок.</p>
+<p>У каждой папки есть назначение, и оно <mark>одинаковое на всех серверах</mark> (стандарт FHS). Поэтому на незнакомом сервере ты сразу знаешь: конфиги — в <code>/etc</code>, логи — в <code>/var/log</code>, данные сервисов — в <code>/var/lib</code>.</p>
+<p>Принцип «<b>всё есть файл</b>»: конфиг — файл, лог — файл, диск — файл в <code>/dev</code>, сведения о процессе — файлы в <code>/proc</code>. Значит, одни и те же <code>cat</code>, <code>grep</code>, <code>tail</code> работают со всем.</p>`,
+theory:`<h2>Карта файловой системы</h2>
+${tbl(['Папка','Что там','Пример'],[
+ ['<code>/etc</code>','<mark>конфиги</mark> системы и сервисов','<code>/etc/nginx/nginx.conf</code>, <code>/etc/ssh/sshd_config</code>'],
+ ['<code>/var/log</code>','<mark>логи</mark>','<code>/var/log/nginx/error.log</code>, <code>/var/log/syslog</code>'],
+ ['<code>/var/lib</code>','данные сервисов (меняются в работе)','<code>/var/lib/docker</code>, <code>/var/lib/postgresql</code>'],
+ ['<code>/opt</code>','сторонние приложения, часто — твой сервис','<code>/opt/app</code>'],
+ ['<code>/home</code>','домашние папки пользователей','<code>/home/deploy/.ssh</code>'],
+ ['<code>/root</code>','домашняя папка root','<code>/root/.bashrc</code>'],
+ ['<code>/usr/bin</code>, <code>/bin</code>','программы (в современных системах /bin → /usr/bin)','<code>/usr/bin/ls</code>'],
+ ['<code>/tmp</code>','временные файлы, могут удаляться при перезагрузке','—'],
+ ['<code>/proc</code>, <code>/sys</code>','<b>виртуальные</b>: ядро показывает своё состояние в виде файлов','<code>/proc/cpuinfo</code>, <code>/proc/1234/</code>'],
+ ['<code>/dev</code>','устройства','<code>/dev/sda</code>, <code>/dev/null</code>'],
+ ['<code>/boot</code>','ядро и загрузчик','<code>/boot/vmlinuz-…</code>'],
+ ['<code>/mnt</code>, <code>/media</code>','точки монтирования дисков','—']])}
+${BOX('Как запомнить','<p><b>etc</b> — «настройки», <b>var</b> — «variable», то, что меняется в работе (логи, данные), <b>opt</b> — «optional», то, что поставили сверху. Сервер сломался → смотришь <code>/var/log</code>, хочешь поменять поведение → <code>/etc</code>.</p>')}
+<h2>Чтение файлов</h2>
+${CMDS([['cat file','вывести целиком (только для маленьких файлов)'],['less file','листать: / — поиск, n — дальше, G — в конец, q — выход'],['head -n 20 file','первые 20 строк'],['tail -n 50 file','последние 50 строк'],['tail -f app.log','следить, как дописывается лог (Ctrl+C — выйти)'],['tail -F app.log','то же, но переживает ротацию лога (файл пересоздали)'],['wc -l file','сколько строк'],['file x','что это за файл: текст, бинарник, архив'],['stat file','размер, права, владелец, даты изменения']])}
+<h2>Создание, копирование, удаление</h2>
+${CMDS([['touch a.txt','создать пустой файл (или обновить дату)'],['mkdir -p a/b/c','создать папки вместе с родителями'],['cp a.txt b.txt','копировать файл'],['cp -r src/ dst/','копировать папку (рекурсивно)'],['cp -a src/ dst/','копировать с сохранением прав, владельца и дат (для бэкапов)'],['mv old new','переместить или <b>переименовать</b>'],['rm file','удалить файл'],['rm -r dir/','удалить папку со всем содержимым'],['ln -s target link','символическая ссылка (ярлык)']])}
+${BOX('Корзины нет','<p><code>rm</code> удаляет сразу и навсегда. <code>rm -rf</code> не спрашивает подтверждения и не жалуется на ошибки. Перед удалением — <code>ls</code> того же пути. Особенно опасно с переменной: если <code>$DIR</code> пустая, <code>rm -rf $DIR/*</code> превращается в <code>rm -rf /*</code> — удаление всего содержимого корня (защита rm --preserve-root спасает только от голого <code>/</code>, но не от <code>/*</code>).</p>','warn')}
+<h2>Поиск файлов</h2>
+${C(`find /etc -name "*.conf"                # по имени (кавычки обязательны!)
+find /var/log -name "*.log" -mtime +7    # изменённые больше 7 дней назад
+find / -size +500M 2>/dev/null           # больше 500 МБ, ошибки доступа скрыть
+find /opt/app -type d                    # только папки (-type f — только файлы)`)}
+<p>Шаблоны <code>*</code> (любые символы) и <code>?</code> (один символ) раскрывает <b>оболочка</b> до запуска команды. Поэтому в <code>find -name</code> шаблон берут в кавычки — иначе bash раскроет его сам по файлам текущей папки.</p>
+<h2>Символические ссылки</h2>
+${C(`
+$ ls -l /etc/nginx/sites-enabled/
+lrwxrwxrwx 1 root root 34 May 3 myapp -> /etc/nginx/sites-available/myapp
+`,'term')}
+<p>Буква <b>l</b> в начале и стрелка <code>-&gt;</code> — это ссылка. Nginx включает сайт ссылкой из <code>sites-enabled</code> на файл в <code>sites-available</code>: удалил ссылку — сайт выключен, а конфиг остался.</p>`,
+memo:`<p>Зайди на свою Ubuntu и пройди по карте: открой по одному файлу из <code>/etc</code>, <code>/var/log</code>, <code>/proc</code>. Для каждой папки скажи вслух, что там лежит. Потом найди через <code>find</code> 5 самых больших файлов в системе.</p>`,
+traps:[
+ ['cat /var/log/syslog на 2 ГБ','less /var/log/syslog или tail -n 200','cat вывалит гигабайты в терминал, и SSH-сессия «зависнет». Большие файлы читаем постранично или с конца.'],
+ ['find / -name *.log','find / -name "*.log"','Без кавычек bash раскроет *.log по текущей папке ещё до запуска find, и поиск будет не тот (или ошибка).'],
+ ['cp /etc/nginx /backup/','cp -r /etc/nginx /backup/ (а лучше cp -a)','Без -r папки не копируются: «omitting directory». -a ещё и сохраняет права и владельца.'],
+ ['rm -rf $APP_DIR/* без проверки','[ -n "$APP_DIR" ] && rm -rf "$APP_DIR"/* — и сначала ls','Пустая переменная превращает команду в rm -rf /* — удаление всего. Кавычки защищают имена с пробелами.'],
+ ['tail -f на лог, который ротируется','tail -F','После ротации старый файл переименован, -f продолжает читать его и «молчит». -F переоткрывает файл по имени.']],
+ex:[
+ {t:'c',q:'Где лежат конфигурационные файлы системы и сервисов?',o:['/etc','/var','/opt','/usr/bin'],a:0,e:'/etc — конфиги: /etc/nginx, /etc/ssh, /etc/hosts.'},
+ {t:'c',q:'Где искать логи nginx в первую очередь?',o:['/var/log/nginx','/etc/nginx/log','/opt/nginx','/tmp/nginx'],a:0,e:'Логи — в /var/log: access.log и error.log.'},
+ {t:'c',q:'Где Docker хранит образы и данные контейнеров по умолчанию?',o:['/var/lib/docker','/etc/docker','/opt/docker','/home/docker'],a:0,e:'/var/lib — изменяемые данные сервисов. В /etc/docker лежит только конфиг daemon.json.'},
+ {t:'c',q:'Что такое <code>/proc</code>?',o:['Виртуальная ФС: ядро показывает процессы и своё состояние как файлы','Папка с программами','Папка с логами процессов','Временные файлы'],a:0,e:'/proc не хранится на диске. /proc/cpuinfo, /proc/meminfo, /proc/&lt;pid&gt;/ — живые данные ядра.'},
+ {t:'c',q:'Какая команда подходит, чтобы <b>следить</b> за логом в реальном времени?',o:['tail -f','head -f','cat -f','less -n'],a:0,e:'tail -f дописывает новые строки по мере появления. Выход — Ctrl+C.'},
+ {t:'c',q:'Как переименовать файл <code>app.conf</code> в <code>app.conf.bak</code>?',o:['mv app.conf app.conf.bak','rename app.conf','cp -r app.conf','ln app.conf.bak'],a:0,e:'Отдельной команды rename в базе нет: переименование = перемещение в то же место под новым именем.'},
+ {t:'i',q:'Впиши команду: создать папки <code>/opt/app/releases/v1</code> одним махом, даже если родителей нет.',a:['mkdir -p /opt/app/releases/v1'],ph:'mkdir …',e:'-p создаёт всю цепочку и не ругается, если папка уже есть.'},
+ {t:'i',q:'Впиши команду: показать последние 100 строк файла <code>/var/log/syslog</code>.',a:['tail -n 100 /var/log/syslog','tail -100 /var/log/syslog','tail -n100 /var/log/syslog'],ph:'tail …',e:'tail -n 100 — последние 100 строк. По умолчанию tail показывает 10.'},
+ {t:'i',q:'Впиши команду: скопировать папку <code>conf</code> в <code>conf.bak</code> с сохранением прав и владельца.',a:['cp -a conf conf.bak','cp -a conf/ conf.bak','cp -a conf/ conf.bak/','cp -rp conf conf.bak'],ph:'cp …',e:'-a (archive) = рекурсивно + права + владелец + даты + ссылки. Для бэкапов конфигов — то, что нужно.'},
+ {t:'i',q:'Впиши команду: найти в <code>/etc</code> все файлы с именем, оканчивающимся на <code>.conf</code>.',a:['find /etc -name "*.conf"',"find /etc -name '*.conf'",'find /etc -type f -name "*.conf"',"find /etc -type f -name '*.conf'"],ph:'find …',e:'Шаблон в кавычках, чтобы его разобрал find, а не bash.'},
+ {t:'s',q:'Собери путь к главному конфигу nginx.',p:['/etc','/nginx','/nginx.conf'],e:'/etc/nginx/nginx.conf — главный конфиг. Сайты — в /etc/nginx/sites-available и sites-enabled.'},
+ {t:'r',q:'Что это за объект?',code:`$ ls -l /etc/nginx/sites-enabled/
+lrwxrwxrwx 1 root root 34 May  3 10:12 shop -> /etc/nginx/sites-available/shop`,lang:'term',o:['Символическая ссылка на файл в sites-available','Обычный файл конфига','Папка','Сломанный файл'],a:0,e:'l в первом символе и стрелка -> — symlink. Конфиг живёт в sites-available, ссылка включает сайт.'},
+ {t:'r',q:'Почему ничего не скопировалось?',code:`$ cp /etc/nginx /root/backup/
+cp: -r not specified; omitting directory '/etc/nginx'`,lang:'term',o:['Это папка, нужен флаг -r (или -a)','Нет прав root','Папки /root/backup нет','nginx запущен и файл занят'],a:0,e:'cp без -r копирует только файлы. Папки — cp -r или cp -a.'},
+ {t:'c',g:'prac',q:'Сервис пишет лог 3 ГБ. Ты хочешь найти в нём первое упоминание <code>timeout</code>. Что лучше?',o:['less app.log, потом /timeout','cat app.log','head app.log','nano app.log'],a:0,e:'less не грузит файл целиком в терминал и умеет искать. cat вывалит 3 ГБ, редактор может съесть всю память.'},
+ {t:'c',g:'prac',q:'Что произойдёт: <code>rm -rf $DIR/*</code>, если переменная <code>DIR</code> пустая?',o:['Команда станет rm -rf /* — удаление всего содержимого корня','Ничего, rm проверит пустую переменную','Удалится текущая папка','Будет ошибка синтаксиса'],a:0,e:'Оболочка подставит пустоту → rm -rf /*, а bash раскроет /* в /bin /etc /home … Защита: проверять переменную, set -u в скриптах, кавычки "$DIR".'},
+ {t:'c',g:'prac',q:'Лог nginx ротируется каждую ночь (logrotate). Утром <code>tail -f access.log</code> перестал показывать новые строки. Почему и что делать?',o:['tail -f держит старый файл; нужен tail -F','nginx перестал писать логи','Закончилось место','Нужен sudo'],a:0,e:'logrotate переименовал файл, nginx пишет в новый, а tail -f читает старый. -F следит за именем и переоткрывает.'},
+ {t:'i',g:'prac',q:'Впиши команду: найти файлы больше 1 ГБ во всей системе, ошибки «Permission denied» скрыть.',a:['find / -size +1G 2>/dev/null','find / -type f -size +1G 2>/dev/null'],ph:'find / …',e:'-size +1G — больше гигабайта. 2>/dev/null — выбросить ошибки (поток ошибок подробно — в модуле «Потоки»).'},
+ {t:'i',g:'prac',fix:true,q:'Исправь команду: найти логи старше 7 дней.',code:'find /var/log -name *.log -mtime 7',a:['find /var/log -name "*.log" -mtime +7',"find /var/log -name '*.log' -mtime +7",'find /var/log -type f -name "*.log" -mtime +7'],ph:'find …',e:'Шаблон в кавычки; -mtime +7 — больше 7 суток. -mtime 7 значит «ровно 7».'},
+ {t:'c',g:'job',q:'Нужно поправить конфиг сайта nginx. Какой файл редактировать?',o:['Файл в /etc/nginx/sites-available (ссылка из sites-enabled укажет на него)','Ссылку в sites-enabled удалить и создать файл','/var/log/nginx/access.log','/opt/nginx/site'],a:0,e:'Редактируем оригинал. Ссылка в sites-enabled просто включает его. Правку проверить nginx -t (модуль Nginx).'},
+ {t:'s',g:'job',q:'Перед правкой прод-конфига. Собери безопасный порядок.',p:['Сделать копию: cp -a app.conf app.conf.bak','Отредактировать app.conf','Проверить синтаксис (например, nginx -t)','Применить (reload сервиса)','Если сломалось — вернуть из .bak'],e:'Бэкап → правка → проверка → применение → путь отката. Так делают всегда, не только с nginx.'},
+ {t:'c',g:'job',q:'Где на сервере искать твоё приложение, если его ставили вручную, не из пакета?',o:['Чаще всего /opt/&lt;имя&gt; (или /srv, /home/&lt;пользователь&gt;)','/proc','/boot','/dev'],a:0,e:'/opt — для стороннего софта и самописных сервисов. Узнать наверняка: посмотреть unit-файл systemd (модуль systemd).'},
+ {t:'c',g:'job',q:'Где посмотреть, сколько ядер у процессора, если нет утилит?',o:['cat /proc/cpuinfo','cat /etc/cpu','ls /dev/cpu','cat /var/log/cpu'],a:0,e:'/proc/cpuinfo, /proc/meminfo — ядро отдаёт данные как файлы. Быстрее: nproc.'}],
+lab:[
+ {t:'Экскурсия: найди и открой на своей машине (1) конфиг SSH-сервера или клиента, (2) системный лог, (3) информацию о памяти от ядра, (4) файл с соответствием имён и IP. Для каждого — полный путь.',h:'<p>Смотри карту: /etc, /var/log, /proc. Файл имён — hosts.</p>',sol:C(`less /etc/ssh/ssh_config       # (sshd_config — если стоит сервер)
+less /var/log/syslog           # в WSL может быть пусто — тогда journalctl
+cat /proc/meminfo
+cat /etc/hosts`)},
+ {t:'В <code>~/lab</code> создай 30 файлов <code>log1.log … log30.log</code>, папку <code>archive</code>. Перемести туда все логи с номерами 1–9, потом найди <code>find</code>-ом все <code>.log</code> вне archive.',h:'<p>Скобки <code>{1..30}</code> раскрывает bash. Шаблон <code>log?.log</code> — один символ.</p>',sol:C(`cd ~/lab && touch log{1..30}.log && mkdir -p archive
+mv log?.log archive/
+find . -name "*.log" -not -path "./archive/*"`)},
+ {t:'Включи «сайт» как в nginx: создай <code>~/lab/sites-available/shop</code>, сделай на него ссылку в <code>~/lab/sites-enabled/</code>, проверь <code>ls -l</code>. Удали ссылку и убедись, что оригинал жив. Затем удали оригинал при живой ссылке и посмотри, что покажет <code>cat</code> по ссылке.',sol:C(`mkdir -p ~/lab/sites-available ~/lab/sites-enabled
+echo "server {}" > ~/lab/sites-available/shop
+ln -s ~/lab/sites-available/shop ~/lab/sites-enabled/shop
+ls -l ~/lab/sites-enabled/
+rm ~/lab/sites-enabled/shop && cat ~/lab/sites-available/shop   # оригинал на месте`)+'<p>Если удалить оригинал — ссылка «висит» (dangling) и cat скажет No such file.</p>'},
+ {t:'Найди 5 самых больших файлов в <code>/var</code>. Пока не знаешь <code>sort</code> — используй <code>find -size</code> и уменьшай порог, пока не останется несколько файлов.',sol:C(`sudo find /var -type f -size +100M 2>/dev/null
+# после модуля «Текст» это делается одной строкой:
+sudo du -ah /var 2>/dev/null | sort -rh | head -5`)}],
+qa:[
+ ['Что лежит в /etc, /var, /opt?','/etc — конфиги. /var — изменяемые данные: /var/log (логи), /var/lib (данные сервисов: docker, postgres). /opt — сторонний и самописный софт.'],
+ ['Что такое /proc?','Виртуальная файловая система: ядро показывает состояние процессов (/proc/&lt;pid&gt;) и системы (cpuinfo, meminfo, loadavg). На диске не хранится.'],
+ ['Что значит «всё есть файл»?','Устройства, процессы, сокеты, конфиги представлены как файлы. Поэтому одни и те же инструменты (cat, grep, tail) работают со всем.'],
+ ['tail -f и tail -F?','-f следит за дескриптором открытого файла; после ротации читает старый. -F следит за именем и переоткрывает файл — для логов с logrotate.'],
+ ['Что такое символическая ссылка?','Файл-указатель на путь другого файла. Если оригинал удалить, ссылка повиснет. Пример — sites-enabled в nginx. Жёсткая ссылка (ln без -s) — второе имя тех же данных.'],
+ ['Как найти, что съело диск?','df -h — какой раздел заполнен; du -sh /* и глубже — какая папка; find / -size +1G — крупные файлы. Подробно — модуль «Сервер тормозит».']],
+cheat:[['less file','листать, / — поиск'],['tail -f / -F log','следить за логом'],['head -n 20 file','начало файла'],['mkdir -p a/b/c','папки с родителями'],['cp -a src dst','копия с правами'],['mv old new','переместить / переименовать'],['rm -r dir','удалить папку'],['ln -s target link','символьная ссылка'],['find /etc -name "*.conf"','поиск по имени'],['find / -size +1G 2>/dev/null','большие файлы'],['stat file','метаданные файла']]});
+/* linux · L1 · Что такое Linux: ядро, дистрибутивы, Ubuntu и LTS */
+MOD({id:'linux',title:'Что такое Linux и дистрибутивы',sub:'Ядро, семейства, Ubuntu, LTS — и почему на проде стоит именно оно.',
+intro:`<p><b>Linux</b> — это <mark>ядро</mark>: программа, которая управляет железом (процессор, память, диски, сеть) и раздаёт его другим программам. Само ядро ничего «не умеет показать» — нет ни команд, ни установщика.</p>
+<p><b>Дистрибутив</b> — это ядро + набор программ вокруг него: оболочка (bash), утилиты (ls, cp, grep), менеджер пакетов (apt, dnf), система запуска (systemd) и настройки по умолчанию. Ubuntu, Debian, RHEL, Alpine — разные дистрибутивы на одном и том же ядре.</p>
+<p>Зачем DevOps-у: почти все серверы, контейнеры и узлы Kubernetes работают на Linux. Чтобы чинить прод, нужно понимать, <b>что именно</b> у тебя стоит: от этого зависят команды установки, пути к конфигам и сроки обновлений безопасности.</p>`,
+theory:`<h2>Из чего состоит система</h2>
+${C(`
+ Приложения:   nginx, postgres, твой сервис       ┐
+ Утилиты:      bash, ls, grep, systemctl          ├ user space (пространство пользователя)
+ Библиотеки:   glibc (или musl в Alpine)          ┘
+ ─────────────── системные вызовы (syscalls) ───────────────
+ Ядро Linux:   процессы, память, файлы, сеть, драйверы   ← kernel space
+ Железо:       CPU, RAM, диск, сетевая карта
+`,'out')}
+<p>Программа не трогает диск напрямую — она просит ядро через <b>системный вызов</b> (open, read, write, fork…). Поэтому ядро может всё контролировать: права, лимиты, изоляцию. На этом позже построены контейнеры (namespaces и cgroups — это функции ядра).</p>
+${BOX('Главная идея','<p>Linux = ядро. Ubuntu = ядро Linux + всё остальное, собранное и протестированное одной командой (Canonical). Ядро у Ubuntu и у RHEL одно, а пакеты, пути и сроки поддержки — разные.</p>')}
+<h2>Семейства дистрибутивов</h2>
+${tbl(['Семейство','Примеры','Пакеты','Где встречается'],[
+ ['Debian','Debian, <b>Ubuntu</b>','<code>apt</code>, файлы <code>.deb</code>','облака, стартапы, большинство туториалов'],
+ ['Red Hat','RHEL, Rocky, AlmaLinux, Fedora, CentOS Stream','<code>dnf</code> (раньше <code>yum</code>), <code>.rpm</code>','банки, enterprise, платная поддержка Red Hat'],
+ ['Alpine','Alpine','<code>apk</code>','Docker-образы: базовый образ ~5 МБ, библиотека musl вместо glibc'],
+ ['Arch','Arch, Manjaro','<code>pacman</code>','десктопы энтузиастов; на проде почти не бывает'],
+ ['Российские','Astra Linux, РЕД ОС, ALT','разные','госсектор и компании, где нужна сертификация ФСТЭК']])}
+<p>Правило на практике: <mark>узнай семейство — и ты знаешь, какой менеджер пакетов и где искать документацию.</mark></p>
+<h2>Модели выпуска</h2>
+<ul><li><b>Фиксированные релизы</b> (Ubuntu, Debian, RHEL) — версия «замораживается», дальше приходят только исправления и патчи безопасности. Предсказуемо → подходит для прода.</li>
+<li><b>Rolling release</b> (Arch) — обновления идут непрерывно, всегда свежее. Для сервера опасно: обновление может принести несовместимые изменения.</li></ul>
+<h2>Ubuntu: версии и LTS</h2>
+<p>Номер версии — это <b>год.месяц</b> выхода: <code>24.04</code> = апрель 2024. Новая версия выходит каждые 6 месяцев: в апреле (<code>.04</code>) и октябре (<code>.10</code>).</p>
+${tbl(['Тип','Когда выходит','Поддержка','Для чего'],[
+ ['<b>LTS</b> (Long Term Support)','раз в 2 года, апрель чётного года: 20.04, 22.04, 24.04, 26.04','5 лет обычной поддержки + до 10 лет с Ubuntu Pro (ESM)','<mark>прод</mark>'],
+ ['Промежуточный (interim)','остальные: 24.10, 25.04, 25.10…','9 месяцев','попробовать новое, десктоп']])}
+<p>Точечные выпуски <code>22.04.1</code>, <code>22.04.5</code> — это та же 22.04 со свежими пакетами и образами установщика, а не новая версия.</p>
+<p>У каждой версии есть кодовое имя: 20.04 — <i>focal</i>, 22.04 — <i>jammy</i>, 24.04 — <i>noble</i>. Оно встречается в адресах репозиториев и в именах Docker-образов (<code>ubuntu:jammy</code> = <code>ubuntu:22.04</code>).</p>
+<h2>Почему на проде ставят Ubuntu LTS</h2>
+<ol><li><b>Предсказуемость.</b> 5+ лет патчей безопасности без смены версий пакетов — сервис не сломается от обновления.</li>
+<li><b>Готовые образы везде:</b> AWS, GCP, Azure, Yandex Cloud, Hetzner, DigitalOcean.</li>
+<li><b>Огромные репозитории и сообщество</b> — на любую ошибку есть ответ, большинство инструкций пишут под Ubuntu.</li>
+<li><b>Автообновления безопасности</b> (<code>unattended-upgrades</code>) и платная поддержка Canonical, если нужна.</li>
+<li><b>Ливпатч ядра</b> (Livepatch) — патч ядра без перезагрузки (с Ubuntu Pro).</li></ol>
+<p>Когда не Ubuntu: компании с договором Red Hat (RHEL), образы контейнеров (Alpine, distroless), госсектор (сертифицированные отечественные дистрибутивы).</p>
+<h2>Как узнать, что у тебя стоит</h2>
+${C(`
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.1 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+$ uname -r
+6.8.0-45-generic
+`,'term')}
+${CMDS([['cat /etc/os-release','дистрибутив и версия (работает везде, включая контейнеры)'],['uname -r','версия ядра'],['uname -a','всё о ядре и архитектуре (x86_64 / aarch64)'],['hostnamectl','имя хоста, ОС, ядро, виртуализация'],['lsb_release -a','версия Ubuntu/Debian (может не быть в контейнере)']])}
+<p><code>ID_LIKE=debian</code> — подсказка: «я из семейства Debian, значит apt».</p>`,
+memo:`<p>Зайди на любой сервер или в контейнер и первым делом спроси систему «кто ты»: ${c('cat /etc/os-release')} и ${c('uname -r')}. Через неделю это станет рефлексом — так делают на собесе в лайв-кодинге и на реальном инциденте.</p>`,
+traps:[
+ ['«Linux — это операционная система, как Windows»','Linux — ядро; ОС — это дистрибутив (Ubuntu, RHEL…)','На собесе спросят разницу. Ядро одно, дистрибутивы отличаются пакетами, путями, сроками поддержки.'],
+ ['Поставить на прод Ubuntu 25.10, «потому что новее»','Ubuntu 24.04 LTS (или 26.04 LTS)','Промежуточный релиз живёт 9 месяцев, потом патчей безопасности нет — придётся срочно обновляться.'],
+ ['Узнавать версию через uname -r','uname -r — ядро, cat /etc/os-release — дистрибутив','Это разные вещи: в контейнере Ubuntu на хосте Debian uname покажет ядро хоста.'],
+ ['В Alpine-контейнере писать apt install','apk add …','Менеджер пакетов зависит от семейства: Alpine — apk, RHEL — dnf, Ubuntu — apt.']],
+ex:[
+ {t:'c',q:'Что такое Linux в строгом смысле?',o:['Ядро операционной системы','Операционная система от Canonical','Графическая оболочка','Менеджер пакетов'],a:0,e:'Linux — это ядро (Линус Торвальдс, 1991). Ubuntu от Canonical — дистрибутив на этом ядре.'},
+ {t:'c',q:'Что входит в дистрибутив кроме ядра?',o:['Утилиты, оболочка, менеджер пакетов, система запуска и настройки','Только драйверы','Только графический интерфейс','Ничего — дистрибутив и есть ядро'],a:0,e:'Дистрибутив = ядро + user space: bash, coreutils, apt/dnf, systemd, конфиги по умолчанию.'},
+ {t:'c',q:'Программа хочет прочитать файл на диске. Как она это делает?',o:['Через системный вызов к ядру','Напрямую обращается к контроллеру диска','Через менеджер пакетов','Через bash'],a:0,e:'Доступ к железу есть только у ядра. Программа делает syscall (open, read), ядро проверяет права и выполняет.'},
+ {t:'c',q:'Какой менеджер пакетов в Ubuntu?',o:['apt','dnf','apk','pacman'],a:0,e:'Ubuntu — семейство Debian: apt и пакеты .deb. dnf — Red Hat, apk — Alpine, pacman — Arch.'},
+ {t:'c',q:'В каком дистрибутиве менеджер пакетов <code>apk</code>?',o:['Alpine','Ubuntu','Rocky Linux','Debian'],a:0,e:'apk — Alpine. Его часто видно в Dockerfile: RUN apk add --no-cache curl.'},
+ {t:'c',q:'Что означает версия Ubuntu <code>22.04</code>?',o:['Выпущена в апреле 2022 года','22-я версия, 4-я сборка','Ядро версии 22.04','Поддержка до 2204 года'],a:0,e:'Номер = год.месяц выхода. 22.04 — апрель 2022.'},
+ {t:'c',q:'Какая из версий — LTS?',o:['24.04','24.10','25.04','25.10'],a:0,e:'LTS выходят в апреле чётных лет: 20.04, 22.04, 24.04, 26.04. 25.04 — апрель, но год нечётный, значит промежуточный.'},
+ {t:'c',q:'Сколько длится обычная поддержка LTS-версии Ubuntu?',o:['5 лет','9 месяцев','1 год','Бессрочно'],a:0,e:'5 лет стандартной поддержки; с Ubuntu Pro (ESM) — до 10 лет. Промежуточные релизы — 9 месяцев.'},
+ {t:'c',q:'Чем rolling release плох для прод-сервера?',o:['Обновления идут непрерывно и могут принести несовместимые изменения','Он не получает патчи безопасности','Его нельзя поставить на сервер','Он не поддерживает SSH'],a:0,e:'Rolling (Arch) всегда свежий, но непредсказуемый. На проде ценят стабильность: фиксированная версия + только патчи.'},
+ {t:'i',q:'Впиши команду, которая показывает версию <b>ядра</b>.',a:['uname -r'],ph:'uname …',e:'uname -r — release ядра, например 6.8.0-45-generic. uname -a — подробнее.'},
+ {t:'i',q:'Впиши команду, которая выводит файл с названием и версией дистрибутива.',a:['cat /etc/os-release','cat /usr/lib/os-release'],ph:'cat /etc/…',e:'/etc/os-release есть почти везде, включая минимальные контейнеры, поэтому это самый надёжный способ.'},
+ {t:'i',q:'Кодовое имя Ubuntu 22.04 (одним словом, маленькими буквами)?',a:['jammy'],ph:'…',e:'22.04 — Jammy Jellyfish. 20.04 — focal, 24.04 — noble. Встречается в sources.list и тегах образов.'},
+ {t:'s',q:'Расставь слои снизу вверх: от железа к приложению.',p:['Железо (CPU, RAM, диск)','Ядро Linux','Библиотеки (glibc)','Утилиты и оболочка (bash, ls)','Приложение (nginx)'],e:'Приложение → библиотеки → syscalls → ядро → железо. Всё выше ядра — user space.'},
+ {t:'r',q:'Какой это дистрибутив и какая у него модель поддержки?',code:`PRETTY_NAME="Ubuntu 24.10"
+VERSION_ID="24.10"
+VERSION_CODENAME=oracular
+ID=ubuntu
+ID_LIKE=debian`,lang:'out',o:['Ubuntu, промежуточный релиз — поддержка 9 месяцев','Ubuntu LTS — поддержка 5 лет','Debian, поддержка 5 лет','Ubuntu LTS 24.04 с обновлением'],a:0,e:'.10 — октябрьский релиз, значит не LTS. Такой сервер скоро останется без патчей.'},
+ {t:'r',q:'Что подсказывает строка <code>ID_LIKE</code>?',code:`NAME="Rocky Linux"
+VERSION_ID="9.4"
+ID="rocky"
+ID_LIKE="rhel centos fedora"`,lang:'out',o:['Это семейство Red Hat — пакеты ставим через dnf','Это Ubuntu — используем apt','Это Alpine — используем apk','Это Arch — используем pacman'],a:0,e:'ID_LIKE перечисляет «родителей». rhel/fedora → dnf и .rpm.'},
+ {t:'c',g:'prac',q:'Ты в Docker-контейнере на базе Debian, а хост — Ubuntu. Что покажет <code>uname -r</code> внутри контейнера?',o:['Ядро хоста','Ядро Debian','Ошибку: в контейнере нет ядра','Версию Docker'],a:0,e:'Контейнер не имеет своего ядра — он использует ядро хоста. Это главное отличие контейнера от VM (будет в модуле про контейнеры).'},
+ {t:'c',g:'prac',q:'Компания выбирает ОС для прод-серверов на 4 года. Что разумнее?',o:['Текущая Ubuntu LTS','Последний промежуточный релиз Ubuntu','Arch Linux','Любая, разницы нет'],a:0,e:'LTS гарантирует патчи на весь срок. Промежуточный релиз пришлось бы обновлять каждые полгода.'},
+ {t:'c',g:'prac',q:'Почему Docker-образы часто основаны на Alpine?',o:['Базовый образ крошечный (~5 МБ) — быстрее скачивать и меньше уязвимостей','В Alpine нет ядра','Alpine — это LTS','В Alpine работает apt'],a:0,e:'Минимальный набор пакетов → маленький размер и маленькая поверхность атаки. Минус — musl вместо glibc, бывают несовместимости.'},
+ {t:'i',g:'prac',fix:true,q:'Исправь: в Dockerfile на базе <code>alpine</code> строка падает с <i>apt: not found</i>.',code:'RUN apt install -y curl',a:['RUN apk add curl','RUN apk add --no-cache curl'],ph:'RUN …',e:'В Alpine менеджер apk: apk add --no-cache curl (флаг --no-cache не оставляет кэш индекса в образе).'},
+ {t:'c',g:'job',q:'Тимлид: «Проверь, не устарела ли ОС на сервере». Ты видишь <code>VERSION_ID="20.04"</code>. Что отвечаешь (сейчас ноябрь 2026)?',o:['20.04 вышла из стандартной поддержки (5 лет → весна 2025), нужен Ubuntu Pro или обновление до 24.04','Всё ок, LTS поддерживается всегда','20.04 — промежуточный релиз, ему 9 месяцев','Надо обновить ядро через uname'],a:0,e:'20.04 + 5 лет = апрель–май 2025. Дальше патчи только через ESM (Ubuntu Pro). План — обновиться до 24.04 LTS.'},
+ {t:'s',g:'job',q:'Ты впервые зашёл на незнакомый сервер. Собери разумный порядок первых шагов.',p:['Узнать дистрибутив: cat /etc/os-release','Узнать ядро и архитектуру: uname -a','Понять, какой менеджер пакетов (по ID_LIKE)','Только потом ставить или чинить что-то'],e:'Сначала «кто ты», потом действия. Команда установки на Ubuntu и на Rocky разная.'},
+ {t:'c',g:'job',q:'Чем <code>22.04.5</code> отличается от <code>22.04</code>?',o:['Это та же версия 22.04 с накопленными обновлениями и новым образом установщика','Это новая LTS','Это промежуточный релиз','Это версия ядра'],a:0,e:'Точечные выпуски — «снимок» той же версии со всеми накопленными пакетами. Срок поддержки тот же.'}],
+lab:[
+ {t:'Поставь себе Linux: WSL с Ubuntu на Windows (<code>wsl --install -d Ubuntu-24.04</code> в PowerShell от администратора) или VirtualBox с Ubuntu Server 24.04. Это твой полигон на весь курс.',h:'<p>Если WSL уже стоит: <code>wsl -l -v</code> покажет установленные дистрибутивы.</p>',chk:'<p>Терминал Ubuntu открывается, видно приглашение вида <code>user@host:~$</code>.</p>'},
+ {t:'Узнай, какой у тебя дистрибутив, версия, кодовое имя, ядро и архитектура. Запиши ответ в одну строку: «Ubuntu 24.04 noble, ядро 6.x, x86_64».',h:'<p>Две команды из теории + флаг <code>-m</code> у uname для архитектуры.</p>',sol:C(`cat /etc/os-release
+uname -r
+uname -m`)},
+ {t:'Запусти контейнер Alpine и сравни: что покажет <code>/etc/os-release</code> и <code>uname -r</code> внутри и снаружи? Объясни своими словами, почему ядро совпадает. (Если Docker ещё нет — вернись к этой лабе после модуля про Docker.)',sol:C(`docker run --rm alpine cat /etc/os-release
+docker run --rm alpine uname -r
+uname -r   # на хосте — то же самое ядро`)+'<p>Контейнер — это процесс на ядре хоста, своего ядра у него нет.</p>'}],
+qa:[
+ ['Чем Linux отличается от дистрибутива?','Linux — ядро: управляет процессами, памятью, файлами, сетью, драйверами. Дистрибутив — ядро + user space: оболочка, утилиты, менеджер пакетов, systemd, настройки и политика обновлений.'],
+ ['Какие семейства дистрибутивов знаешь?','Debian (Debian, Ubuntu — apt/.deb), Red Hat (RHEL, Rocky, Alma, Fedora — dnf/.rpm), Alpine (apk, musl, для контейнеров), Arch (pacman, rolling).'],
+ ['Что такое LTS в Ubuntu?','Long Term Support: выходит раз в 2 года в апреле чётного года, 5 лет обычной поддержки и до 10 лет с Ubuntu Pro. Промежуточные релизы — 9 месяцев.'],
+ ['Почему на проде Ubuntu LTS?','Предсказуемые патчи безопасности на годы без смены версий, образы во всех облаках, большие репозитории и сообщество, unattended-upgrades, коммерческая поддержка и Livepatch.'],
+ ['Что такое kernel space и user space?','Ядро работает в привилегированном режиме и имеет доступ к железу. Программы — в пользовательском и обращаются к ядру через системные вызовы. Так ядро контролирует права и изоляцию.'],
+ ['Как узнать версию ОС и ядра?','cat /etc/os-release — дистрибутив; uname -r — ядро; uname -m — архитектура; hostnamectl — всё вместе.']],
+cheat:[['cat /etc/os-release','дистрибутив и версия'],['uname -r','версия ядра'],['uname -m','архитектура'],['hostnamectl','хост, ОС, ядро'],['lsb_release -a','версия Ubuntu/Debian']]});
+/* r1 · Обзор 1 — накопительный по пройденным темам Л1 (пилот: linux, shell, files; perms/streams/text/procs добавятся сюда по мере готовности) */
+REV({id:'r1',title:'Обзор 1: первые шаги на сервере',
+theory:`<p>Без подсказок. Каждое задание — ситуация, где нужно соединить несколько тем: дистрибутив, оболочку, пути и файлы. Ошибся — перечитай модуль по ссылке ↺.</p>`,
+ex:[
+ {t:'r',ref:'linux',q:'Ты зашёл на сервер. Какой командой ставить пакеты?',code:`$ cat /etc/os-release | head -4
+NAME="AlmaLinux"
+VERSION="9.4 (Seafoam Ocelot)"
+ID="almalinux"
+ID_LIKE="rhel centos fedora"`,lang:'term',o:['dnf install','apt install','apk add','pacman -S'],a:0,e:'ID_LIKE=rhel → семейство Red Hat → dnf.'},
+ {t:'c',ref:'linux',q:'На проде <code>VERSION_ID="23.10"</code>. Какой главный риск?',o:['Промежуточный релиз давно без патчей безопасности','Слишком новое ядро','Не работает SSH','Нет менеджера пакетов'],a:0,e:'23.10 — interim, 9 месяцев поддержки (до середины 2024). Сервер годами без патчей.'},
+ {t:'i',ref:'files',q:'Впиши одной командой: следить за логом ошибок nginx так, чтобы чтение пережило ротацию.',a:['tail -F /var/log/nginx/error.log','sudo tail -F /var/log/nginx/error.log'],ph:'tail …',e:'Логи nginx — /var/log/nginx, ротация → -F.'},
+ {t:'r',ref:'shell',q:'Что не так?',code:`$ cd /opt/app
+$ ls -l
+-rw-r--r-- 1 deploy deploy 412 Nov 20 run.sh
+$ ./run.sh
+-bash: ./run.sh: Permission denied`,lang:'term',o:['У файла нет права x — нужен chmod +x run.sh','Нет шебанга','Неверный путь','Скрипт с CRLF'],a:0,e:'В правах rw-r--r-- нигде нет x. chmod +x или bash run.sh.'},
+ {t:'r',ref:'shell',q:'Скрипт написан в VS Code на Windows и залит на сервер. Что видим?',code:`$ cat -A deploy.sh | head -2
+#!/usr/bin/env bash^M$
+set -e^M$`,lang:'term',o:['CRLF-переносы: ^M — это \\r, нужно dos2unix','Скрипт зашифрован','Нет прав на чтение','Скрипт для PowerShell'],a:0,e:'cat -A показывает \\r как ^M. Убираем: dos2unix deploy.sh.'},
+ {t:'c',ref:'files',q:'Диск забит. Где искать в первую очередь на сервере с Docker и nginx?',o:['/var/log и /var/lib/docker','/etc и /boot','/proc и /sys','/usr/bin'],a:0,e:'Растут логи и данные сервисов — /var. /proc и /sys не занимают диск вообще.'},
+ {t:'s',ref:'files',q:'Нужно поменять порт в <code>/etc/myapp/app.conf</code> на проде. Собери порядок.',p:['cp -a /etc/myapp/app.conf /etc/myapp/app.conf.bak','Отредактировать app.conf','Проверить конфиг средствами приложения','Перезапустить сервис','Убедиться по логу в /var/log, что поднялся'],e:'Бэкап → правка → проверка → применение → проверка по логу.'},
+ {t:'i',ref:'files',fix:true,q:'Исправь: должна найти все .conf в /etc, а выдаёт мусор или ошибку <i>paths must precede expression</i>.',code:'find /etc -name *.conf',a:['find /etc -name "*.conf"',"find /etc -name '*.conf'"],ph:'find …',e:'Bash раскрыл *.conf по текущей папке до запуска find. Кавычки отдают шаблон find.'},
+ {t:'c',ref:'linux',q:'В контейнере <code>ubuntu:22.04</code> на хосте с ядром 6.8 команда <code>uname -r</code> покажет…',o:['6.8 — ядро хоста','5.15 — ядро Ubuntu 22.04','Ошибку','22.04'],a:0,e:'У контейнера нет своего ядра. А /etc/os-release внутри покажет Ubuntu 22.04.'},
+ {t:'c',ref:'shell',q:'<code>env.sh</code> делает <code>export DB_HOST=db</code>. После <code>./env.sh</code> переменной в терминале нет. Почему?',o:['Скрипт выполнился в дочернем процессе; нужно source env.sh','export работает только в PowerShell','Нужен sudo','Переменная записалась в /etc'],a:0,e:'Дочерний процесс не может изменить окружение родителя. source выполняет в текущей оболочке.'},
+ {t:'i',ref:'shell',q:'Впиши команду: найти, где лежит программа <code>docker</code>.',a:['which docker','command -v docker','type docker','type -p docker'],ph:'…',e:'which ищет по $PATH. command -v — POSIX-вариант, удобен в скриптах.'},
+ {t:'r',ref:'files',q:'Почему сайт не работает, хотя ссылка есть?',code:`$ ls -l /etc/nginx/sites-enabled/
+lrwxrwxrwx 1 root root 33 shop -> /etc/nginx/sites-available/shp
+$ ls /etc/nginx/sites-available/
+default  shop`,lang:'term',o:['Ссылка ведёт на несуществующий файл shp — опечатка, ссылка висит','Нужно перезагрузить сервер','Файл shop пустой','Ссылки nginx не читает'],a:0,e:'Цель ссылки — shp, а файл называется shop. Пересоздать: ln -sf /etc/nginx/sites-available/shop …'},
+ {t:'c',ref:'shell',q:'Ты под root (<code>#</code>) и набираешь <code>rm -rf /opt/app /</code> — пробел перед последним /. Что произойдёт?',o:['/opt/app удалится, а на / GNU rm откажется (защита --preserve-root); с /* такой защиты уже нет','Ничего не удалится — ошибка синтаксиса','Удалится вся система без предупреждений','rm спросит подтверждение для каждого файла'],a:0,e:'Два аргумента: /opt/app и /. Современный rm по умолчанию не трогает сам корень, но rm -rf /* (bash раскроет в /bin /etc …) снесёт всё. Перед rm -rf — ls того же пути.'},
+ {t:'i',ref:'files',q:'Впиши: последние 30 строк системного лога Ubuntu.',a:['tail -n 30 /var/log/syslog','tail -30 /var/log/syslog','sudo tail -n 30 /var/log/syslog','tail -n30 /var/log/syslog'],ph:'tail …',e:'/var/log/syslog — общий лог в Ubuntu (в RHEL — /var/log/messages).'},
+ {t:'c',ref:'linux',q:'На собесе: «Почему вы выбрали бы Ubuntu LTS, а не Arch для прода?» Лучший короткий ответ:',o:['Фиксированная версия с патчами безопасности на 5+ лет — обновления не ломают совместимость','Arch нельзя поставить на сервер','В Ubuntu быстрее ядро','В Arch нет SSH'],a:0,e:'Суть — предсказуемость: rolling release несёт непрерывные изменения, LTS — только исправления.'},
+ {t:'s',ref:'shell',q:'Скрипт из репозитория не запускается. Собери порядок диагностики.',p:['ls -l script.sh — есть ли x','head -1 script.sh — какой шебанг','cat -A script.sh | head — нет ли ^M','Запустить bash -x script.sh — где падает'],e:'Права → интерпретатор → переносы → трассировка (bash -x печатает каждую команду).'},
+ {t:'c',ref:'files',q:'Нужна точная копия <code>/etc/nginx</code> перед обновлением, с правами и владельцами. Что выбрать?',o:['cp -a /etc/nginx /root/nginx.bak','cp /etc/nginx /root/nginx.bak','mv /etc/nginx /root/nginx.bak','ln -s /etc/nginx /root/nginx.bak'],a:0,e:'cp без -r не скопирует папку, mv унесёт оригинал, ссылка — не копия.'},
+ {t:'r',ref:'files',q:'Что это за файл и можно ли его читать как текст?',code:`$ file /usr/bin/ls /etc/hosts /var/log/syslog.2.gz
+/usr/bin/ls:            ELF 64-bit LSB pie executable, x86-64
+/etc/hosts:             ASCII text
+/var/log/syslog.2.gz:   gzip compressed data`,lang:'term',o:['ls — бинарник, hosts — текст, syslog.2.gz — сжатый лог (читать zcat/zless)','Все три — текст','Все три — бинарники','hosts — архив'],a:0,e:'Старые логи после ротации сжаты. Читать без распаковки: zless, zcat, zgrep.'},
+ {t:'c',ref:'shell',q:'В PowerShell на Windows нужно запустить <code>build.ps1</code> из текущей папки. Как?',o:['.\\build.ps1','build.ps1','sh build.ps1','./build.sh'],a:0,e:'Как и в bash, явный путь к текущей папке. ExecutionPolicy может ещё запретить запуск — тогда Get-ExecutionPolicy.'},
+ {t:'i',ref:'files',q:'Впиши одной командой: создать <code>/opt/app/releases/2026-11-24</code> и <code>/opt/app/shared/logs</code>.',a:['mkdir -p /opt/app/releases/2026-11-24 /opt/app/shared/logs','sudo mkdir -p /opt/app/releases/2026-11-24 /opt/app/shared/logs'],ph:'mkdir …',e:'mkdir принимает несколько путей; -p создаёт родителей.'},
+ {t:'c',ref:'linux',q:'Какая команда скажет, ARM у тебя или x86 (важно для выбора Docker-образа)?',o:['uname -m','uname -r','cat /etc/os-release','hostname'],a:0,e:'uname -m → x86_64 или aarch64. Образ под чужую архитектуру упадёт с exec format error.'},
+ {t:'r',ref:'files',q:'Почему <code>tail -f</code> молчит, хотя сайт работает?',code:`$ ls -l /var/log/nginx/
+-rw-r----- 1 www-data adm 52881 Nov 24 09:14 access.log
+-rw-r----- 1 www-data adm 9912044 Nov 24 00:00 access.log.1
+$ tail -f access.log.1`,lang:'term',o:['Следим за старым, ротированным файлом — новые записи идут в access.log','Нет прав','nginx завис','Сломан tail'],a:0,e:'access.log.1 — вчерашний. Нужен tail -F access.log.'}]});
+/* shell · L1 · Терминал, оболочка, навигация, .sh / .bash / .ps1 */
+MOD({id:'shell',title:'Терминал, навигация и .sh / .ps1',sub:'Оболочка, пути, флаги, справка — и чем скрипт .sh отличается от .ps1.',
+intro:`<p><b>Терминал</b> — это окно, куда ты печатаешь. <b>Оболочка (shell)</b> — программа внутри него, которая читает твою строку, разбирает её и запускает нужную программу. В Linux обычно оболочка <b>bash</b>, в Windows — <b>PowerShell</b>.</p>
+<p>У серверов нет мышки и окон: ты заходишь по SSH и делаешь всё командами. Поэтому навигация, пути и чтение справки — это базовый навык, как умение пользоваться рулём.</p>
+<p>Главная идея: <mark>команда = программа + флаги + аргументы</mark>. Не помнишь флаг — не гугли сразу, спроси систему: <code>man</code> и <code>--help</code>.</p>`,
+theory:`<h2>Приглашение (prompt)</h2>
+${C(`
+user@web-01:~$          ← обычный пользователь ($), сейчас в домашней папке (~)
+root@web-01:/etc#       ← root (#), сейчас в /etc
+`,'out')}
+<p><b>$</b> — обычный пользователь, <b>#</b> — root (суперпользователь, может всё, в том числе сломать систему). Видишь <code>#</code> — будь вдвое внимательнее.</p>
+<h2>Как устроена команда</h2>
+${C(`ls -l -a /var/log
+ls -la /var/log            # короткие флаги можно склеить
+ls --all --human-readable  # длинные флаги — через два дефиса`)}
+${tbl(['Часть','Пример','Что это'],[['команда','<code>ls</code>','программа, которую запускаем'],['флаги (опции)','<code>-la</code>, <code>--all</code>','как именно работать'],['аргументы','<code>/var/log</code>','с чем работать']])}
+<p>Откуда оболочка знает, где лежит <code>ls</code>? Она ищет файл в папках из переменной <code>$PATH</code>. Проверить: ${c('which ls')} → <code>/usr/bin/ls</code>.</p>
+<h2>Пути</h2>
+${tbl(['Запись','Значит','Пример'],[
+ ['<code>/</code>','корень всей файловой системы','<code>cd /</code>'],
+ ['<code>/etc/nginx</code>','<b>абсолютный</b> путь — от корня, работает откуда угодно','<code>cd /etc/nginx</code>'],
+ ['<code>logs/app.log</code>','<b>относительный</b> — от текущей папки','<code>cat logs/app.log</code>'],
+ ['<code>.</code>','текущая папка','<code>./deploy.sh</code>'],
+ ['<code>..</code>','папка выше','<code>cd ../..</code>'],
+ ['<code>~</code>','домашняя папка (<code>/home/user</code>, у root — <code>/root</code>)','<code>cd ~</code> или просто <code>cd</code>'],
+ ['<code>-</code> (в cd)','предыдущая папка','<code>cd -</code>']])}
+<h2>Навигация</h2>
+${CMDS([['pwd','где я сейчас (print working directory)'],['ls','что в папке'],['ls -la','всё, включая скрытые (имя с точки: .env, .ssh), с правами и размером'],['ls -lh','размеры в K/M/G'],['cd /path','перейти'],['cd ..','на уровень выше'],['cd -','вернуться туда, где был'],['tree -L 2','дерево папок на 2 уровня (если установлен)']])}
+<h2>Горячие клавиши — экономят часы</h2>
+${tbl(['Клавиши','Что делает'],[['<b>Tab</b>','дописать имя файла/команды; два раза — показать варианты'],['<b>↑ / ↓</b>','прошлые команды'],['<b>Ctrl+R</b>','поиск по истории: начни печатать кусок команды'],['<b>Ctrl+C</b>','прервать текущую команду'],['<b>Ctrl+D</b>','конец ввода / выйти из оболочки (и из SSH-сессии)'],['<b>Ctrl+L</b>','очистить экран'],['<b>Ctrl+A / Ctrl+E</b>','в начало / в конец строки']])}
+<h2>Справка — спроси систему сама</h2>
+${CMDS([['man ls','полное руководство. Поиск внутри: /слово, следующее — n, выход — q'],['ls --help','краткая справка по флагам'],['type cd','что это: встроенная команда оболочки, алиас или файл'],['which nginx','где лежит программа'],['history','история команд']])}
+<h2>Скрипты: .sh, .bash, .ps1</h2>
+<p>Скрипт — это файл с командами, которые выполняются по очереди. <mark>В Linux расширение ничего не решает</mark> — это только подсказка человеку. Решают две вещи: <b>шебанг</b> в первой строке и <b>право на выполнение</b>.</p>
+${C(`#!/usr/bin/env bash
+# deploy.sh — первая строка (шебанг) говорит ядру, каким интерпретатором выполнять файл
+echo "Привет с $(hostname)"`)}
+${tbl(['Как запустить','Что происходит'],[
+ ['<code>./deploy.sh</code>','нужен <code>chmod +x</code>; ядро читает шебанг и запускает bash. <code>./</code> обязательно: текущей папки нет в PATH'],
+ ['<code>bash deploy.sh</code>','права на выполнение не нужны, шебанг игнорируется — явно bash'],
+ ['<code>sh deploy.sh</code>','запустит <b>sh</b>, а в Ubuntu это <b>dash</b> — более простая оболочка. Bash-фишки (<code>[[ ]]</code>, массивы) сломаются'],
+ ['<code>source deploy.sh</code> или <code>. deploy.sh</code>','выполнить <b>в текущей</b> оболочке: переменные и <code>cd</code> останутся после скрипта']])}
+${tbl(['Расширение','Что это','Где'],[
+ ['<code>.sh</code>','скрипт оболочки (обычно bash или sh) — соглашение','Linux, macOS, CI'],
+ ['<code>.bash</code>','то же, но подчёркивает: нужен именно bash','Linux'],
+ ['<code>.ps1</code>','скрипт <b>PowerShell</b>','Windows; на Linux — через <code>pwsh</code>']])}
+${BOX('PowerShell — другой мир',`<p>Bash передаёт по пайпу <b>текст</b>, PowerShell — <b>объекты</b> со свойствами. В PowerShell есть алиасы <code>ls</code>, <code>cd</code>, <code>cat</code>, но это другие команды (<code>Get-ChildItem</code>…), и флаги у них другие: <code>ls -la</code> там не сработает.</p>
+<p>Запуск: <code>.\\deploy.ps1</code> (обратный слэш) или <code>pwsh -File deploy.ps1</code>. Windows может запретить запуск скриптов политикой <b>ExecutionPolicy</b> — смотреть <code>Get-ExecutionPolicy</code>. Подробно — в модуле «PowerShell».</p>`,'deep')}
+${BOX('Ловушка переносов строк',`<p>Windows заканчивает строки символами <b>CRLF</b> (\\r\\n), Linux — <b>LF</b> (\\n). Скрипт .sh, сохранённый в Windows, на сервере упадёт с ошибкой <code>/usr/bin/env: 'bash\\r': No such file or directory</code>. Лечение: <code>sed -i 's/\\r$//' deploy.sh</code> или <code>dos2unix deploy.sh</code>, а в редакторе выбрать LF.</p>`,'warn')}`,
+memo:`<p>Неделю не трогай мышку в файловом менеджере: всё, что делаешь с файлами, делай в терминале. Каждую незнакомую команду сначала смотри через <code>--help</code>, потом через <code>man</code>. Ctrl+R вместо стрелки вверх 20 раз.</p>`,
+traps:[
+ ['deploy.sh → «command not found»','./deploy.sh','Оболочка ищет команды только в папках из $PATH. Текущей папки там нет (защита от подложенных программ), поэтому путь указываем явно.'],
+ ['./deploy.sh → «Permission denied»','chmod +x deploy.sh, затем ./deploy.sh (или bash deploy.sh)','Чтобы запустить файл как программу, нужно право на выполнение (x).'],
+ ['sh script.sh для скрипта с [[ ]] и массивами','bash script.sh или ./script.sh с шебангом bash','В Ubuntu sh — это dash, он не понимает bash-расширения: «[[: not found».'],
+ ['«Расширение .sh делает файл исполняемым»','Исполняемым делает chmod +x, а интерпретатор — шебанг','Linux не смотрит на расширение. Файл run без расширения с шебангом и +x работает так же.'],
+ ['Скрипт из Windows: «bash\\r: No such file»','Перевести переносы в LF: dos2unix или sed -i \'s/\\r$//\'','CRLF-переносы — невидимый \\r в конце каждой строки, в том числе в шебанге.']],
+ex:[
+ {t:'c',q:'Чем терминал отличается от оболочки (shell)?',o:['Терминал — окно ввода, оболочка — программа, которая разбирает и выполняет команды','Это одно и то же','Оболочка — это окно, терминал — интерпретатор','Терминал есть только в Windows'],a:0,e:'Терминал (GNOME Terminal, Windows Terminal) показывает текст. Bash/zsh/PowerShell — интерпретатор внутри.'},
+ {t:'c',q:'Приглашение заканчивается на <code>#</code>. Что это значит?',o:['Ты работаешь как root','Ты в папке /root','Команда закомментирована','Нет подключения'],a:0,e:'$ — обычный пользователь, # — root. У root нет «защиты от дурака».'},
+ {t:'c',q:'Что делает <code>ls -la</code>?',o:['Показывает все файлы, включая скрытые, в подробном виде','Показывает только скрытые файлы','Удаляет все файлы','Показывает только папки'],a:0,e:'-l — длинный формат (права, владелец, размер, дата), -a — all, включая файлы с точки (.env, .ssh).'},
+ {t:'c',q:'Какой путь — абсолютный?',o:['/var/log/nginx','var/log/nginx','../log/nginx','./nginx'],a:0,e:'Абсолютный начинается с / (корня) и одинаков из любой папки. Остальные считаются от текущей.'},
+ {t:'c',q:'Куда приведёт <code>cd ~</code>?',o:['В домашнюю папку пользователя','В корень /','В предыдущую папку','В /tmp'],a:0,e:'~ — домашняя папка: /home/имя (у root — /root). Просто cd без аргументов делает то же самое.'},
+ {t:'c',q:'Что делает <code>cd -</code>?',o:['Возвращает в предыдущую папку','Переходит на уровень выше','Переходит в корень','Выдаёт ошибку'],a:0,e:'cd - переключает между двумя последними папками. На уровень выше — cd ..'},
+ {t:'i',q:'Впиши команду: показать, в какой папке ты сейчас находишься.',a:['pwd'],ph:'…',e:'pwd — print working directory.'},
+ {t:'i',q:'Ты в <code>/var/log/nginx</code>. Впиши команду, чтобы подняться на два уровня выше (в /var).',a:['cd ../..','cd ../../','cd /var'],ph:'cd …',e:'.. — уровень выше, ../.. — два уровня. Можно и абсолютным путём: cd /var.'},
+ {t:'i',q:'Впиши команду, которая открывает полное руководство по <code>tail</code>.',a:['man tail'],ph:'…',e:'man tail. Внутри: / — поиск, n — следующее совпадение, q — выход.'},
+ {t:'i',q:'Впиши, как показать краткую справку по флагам <code>grep</code> (без man).',a:['grep --help'],ph:'grep …',e:'--help есть почти у всех утилит и печатает флаги прямо в терминал.'},
+ {t:'c',q:'Какая клавиша дописывает имя файла или команды?',o:['Tab','Ctrl+C','Ctrl+D','Esc'],a:0,e:'Tab — автодополнение. Двойной Tab показывает все варианты. Меньше опечаток в путях.'},
+ {t:'c',q:'Команда зависла. Как прервать её?',o:['Ctrl+C','Ctrl+D','Ctrl+Z','Ctrl+L'],a:0,e:'Ctrl+C посылает сигнал SIGINT — «прерви». Ctrl+Z приостанавливает (не убивает!), Ctrl+D — конец ввода.'},
+ {t:'c',q:'Как найти команду, которую ты набирал вчера, если помнишь кусок <code>docker</code>?',o:['Ctrl+R и начать печатать docker','Ctrl+L','Нажать Tab','man history'],a:0,e:'Ctrl+R — обратный поиск по истории. Повторное Ctrl+R — следующее совпадение.'},
+ {t:'c',q:'Что определяет, каким интерпретатором выполнится <code>./run</code>?',o:['Шебанг в первой строке файла','Расширение файла','Имя папки','Переменная HOME'],a:0,e:'Ядро читает #! в начале файла. Расширения у run может вообще не быть.'},
+ {t:'s',q:'Собери правильный порядок, чтобы запустить новый скрипт как <code>./backup.sh</code>.',p:['Первой строкой написать #!/usr/bin/env bash','Сохранить файл с переносами LF','Дать право: chmod +x backup.sh','Запустить: ./backup.sh'],e:'Шебанг → правильные переносы → право на выполнение → запуск с явным путём.'},
+ {t:'r',q:'Почему не запустилось?',code:`$ deploy.sh
+deploy.sh: command not found
+$ ls
+deploy.sh`,lang:'term',o:['Текущей папки нет в PATH — нужно ./deploy.sh','Файла не существует','Нет шебанга','Нужен root'],a:0,e:'Файл есть (ls его показал), но оболочка ищет команды только в $PATH. Указываем путь: ./deploy.sh.'},
+ {t:'r',q:'В чём причина ошибки?',code:`$ ./setup.sh
+/usr/bin/env: 'bash\\r': No such file or directory`,lang:'term',o:['Файл сохранён с Windows-переносами CRLF','bash не установлен','Нет права на выполнение','Неверный путь к env'],a:0,e:'\\r в конце шебанга — след CRLF. Лечим dos2unix setup.sh или sed -i \'s/\\r$//\' setup.sh.'},
+ {t:'c',g:'prac',q:'Скрипт использует <code>[[ $x == 1 ]]</code>. Его запустили через <code>sh script.sh</code> в Ubuntu и получили <i>[[: not found</i>. Почему?',o:['sh в Ubuntu — это dash, он не знает [[ ]]','В скрипте опечатка','Нужно sudo','[[ ]] работает только в PowerShell'],a:0,e:'/bin/sh → dash (POSIX). Для bash-синтаксиса запускай bash script.sh или ./script.sh с шебангом bash.'},
+ {t:'c',g:'prac',q:'Чем <code>source env.sh</code> отличается от <code>./env.sh</code>?',o:['source выполняет в текущей оболочке — переменные остаются после скрипта','Ничем','source работает только в Windows','./env.sh быстрее и сохраняет переменные'],a:0,e:'./env.sh запускается в дочернем процессе: его export исчезнет, когда он завершится. source (или .) — в текущем.'},
+ {t:'c',g:'prac',q:'Что такое файл <code>deploy.ps1</code>?',o:['Скрипт PowerShell','Скрипт bash','Конфиг Docker','Бинарный файл Linux'],a:0,e:'.ps1 — PowerShell. В Windows запускают .\\deploy.ps1, на Linux — pwsh -File deploy.ps1.'},
+ {t:'i',g:'job',fix:true,q:'Исправь команду для PowerShell в Windows: запустить скрипт из текущей папки.',code:'deploy.ps1',a:['.\\deploy.ps1','./deploy.ps1'],ph:'…',e:'PowerShell, как и bash, не ищет скрипты в текущей папке без явного пути: .\\deploy.ps1.'},
+ {t:'c',g:'job',q:'В PowerShell ты набрал <code>ls -la</code> и получил ошибку про параметр. Почему?',o:['ls в PowerShell — алиас Get-ChildItem с другими параметрами','PowerShell не умеет показывать файлы','Нужно запустить от администратора','Опечатка в пути'],a:0,e:'Алиасы ls/cat/cd в PowerShell — это другие команды. Аналог ls -la: Get-ChildItem -Force (или ls -Force).'},
+ {t:'s',g:'job',q:'Ты зашёл на сервер и не знаешь, где nginx и что это за команда. Собери порядок разведки.',p:['which nginx — где лежит программа','nginx -h — краткая справка','man nginx — полное руководство','Только потом запускать с флагами'],e:'Сначала найди, потом спроси у самой программы, и только потом действуй.'}],
+lab:[
+ {t:'Без мышки: создай в домашней папке структуру <code>lab/app/logs</code> и <code>lab/app/conf</code>, перейди в <code>logs</code>, оттуда одной командой перейди в <code>conf</code>, потом вернись обратно через <code>cd -</code>. Каждый шаг проверяй <code>pwd</code>.',h:'<p>Для вложенных папок посмотри флаг <code>-p</code> в <code>mkdir --help</code>.</p>',sol:C(`mkdir -p ~/lab/app/logs ~/lab/app/conf
+cd ~/lab/app/logs && pwd
+cd ../conf && pwd
+cd - && pwd`)},
+ {t:'Напиши скрипт <code>~/lab/hello.sh</code>, который печатает имя хоста и текущую папку. Запусти его тремя способами: <code>./hello.sh</code>, <code>bash hello.sh</code>, <code>source hello.sh</code>. Найди, какой из способов работает без <code>chmod +x</code>.',h:'<p>Команды hostname и pwd. Не забудь шебанг.</p>',sol:C(`cat > ~/lab/hello.sh <<'EOF'
+#!/usr/bin/env bash
+echo "host: $(hostname), dir: $(pwd)"
+EOF
+cd ~/lab
+bash hello.sh        # работает без +x
+source hello.sh      # тоже без +x
+./hello.sh           # Permission denied, пока не сделать:
+chmod +x hello.sh && ./hello.sh`)},
+ {t:'Сломай и почини: сделай в скрипте Windows-переносы и посмотри на ошибку. Потом найди невидимые символы и убери их.',h:'<p><code>sed -i \'s/$/\\r/\' file</code> добавит \\r в конец строк. <code>cat -A file</code> покажет его как <code>^M</code>.</p>',sol:C(`sed -i 's/$/\\r/' hello.sh   # испортили
+./hello.sh                  # ошибка bash\\r
+cat -A hello.sh             # видно ^M$ в конце строк
+sed -i 's/\\r$//' hello.sh   # починили`)},
+ {t:'Разведка: для команд <code>cd</code>, <code>ls</code>, <code>ll</code> выясни через <code>type</code>, что из них встроенная команда, что файл, а что алиас. Объясни, почему у <code>cd</code> не может быть отдельного файла-программы.',sol:'<p><code>cd</code> — builtin: дочерний процесс не может сменить папку родителя, поэтому cd обязан работать внутри самой оболочки. <code>ls</code> — файл /usr/bin/ls. <code>ll</code> в Ubuntu — алиас ls -alF из ~/.bashrc.</p>'}],
+qa:[
+ ['Чем терминал отличается от shell?','Терминал — программа-окно для ввода/вывода текста. Shell (bash, zsh, sh, PowerShell) — интерпретатор: разбирает строку, раскрывает переменные и пути, запускает процессы.'],
+ ['Абсолютный и относительный путь?','Абсолютный — от корня /, не зависит от текущей папки. Относительный — от текущей (pwd), использует . и ..'],
+ ['Почему скрипт запускают через ./script.sh?','Оболочка ищет команды только в $PATH, текущей папки там нет из соображений безопасности. ./ — явный путь.'],
+ ['Что такое шебанг?','Первая строка #!/путь/к/интерпретатору. Ядро по ней понимает, чем выполнять файл. #!/usr/bin/env bash — найти bash через PATH.'],
+ ['Чем sh отличается от bash?','sh — POSIX-оболочка, в Ubuntu это dash: быстрая и минимальная. bash — расширения: [[ ]], массивы, {1..10}. Скрипт на bash через sh может упасть.'],
+ ['Разница ./script.sh и source script.sh?','./ — новый дочерний процесс, его переменные и cd исчезают после завершения. source — в текущей оболочке, изменения остаются (так подгружают .env, ~/.bashrc).'],
+ ['Чем .sh отличается от .ps1?','.sh — скрипт POSIX-оболочки (bash/sh), текст по пайпам. .ps1 — PowerShell, объекты по пайпам, на Windows ограничен ExecutionPolicy. В Linux расширение не важно, важны шебанг и +x.']],
+cheat:[['pwd','где я'],['ls -la','все файлы с правами'],['cd -','в предыдущую папку'],['man <cmd>','руководство'],['<cmd> --help','краткая справка'],['type <cmd>','builtin / алиас / файл'],['which <cmd>','где лежит программа'],['chmod +x script.sh','сделать исполняемым'],['bash script.sh','запустить без +x'],['source .env','выполнить в текущей оболочке'],['dos2unix file.sh','CRLF → LF']]});
+/* Единственный источник порядка. Модуль, которого ещё нет в src/modules, просто пропускается. */
+const LEVELS=[
+  {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','ssh','fw','nginx','git']},
+  {id:'L2',name:'Контейнеры',ids:['ctr','docker','dfile','multi','r3','vol','dnet','compose','registry','orch']},
+  {id:'L3',name:'Kubernetes',ids:['k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage','helm','incident']},
+  {id:'L4',name:'Доставка и инфраструктура',ids:['gitlabci','runners','vault','tf1','tfstate','tfmod','prom','grafana','bluegreen','sql']},
+  {id:'L5',name:'Собес',ids:[]}];
+const ORDER=LEVELS.flatMap(l=>l.ids.filter(id=>MODS[id]).map(id=>(MODS[id].lvl=MODS[id].lvl||l.id,id)));
+const PASS=0.6; /* порог открытия следующего модуля */
+/* Задания. Общие поля: t (тип), q (вопрос, html), e (почему — обязательно), g (группа), ref (id прошлой темы для ↺), code+lang (блок кода).
+   t:'c'  выбор       {o:[варианты], a:индекс верного}        — варианты перемешиваются
+   t:'r'  чтение      то же, что 'c', но с логом/конфигом в code
+   t:'i'  впиши       {a:['ответ','допустимый вариант'], ph:'подсказка в поле', fix:true — «исправь ошибку»}
+   t:'s'  собери      {p:['шаг 1','шаг 2',…]} — в верном порядке, на экране перемешиваются
+   Группы g: base Базовые · prac Практика · job Как на работе · mix Смешанные (ставится сам, если есть ref) */
+const TYPES={c:['Выбор','t-c'],r:['Чтение','t-r'],i:['Впиши','t-i'],s:['Собери','t-s']};
+const GROUPS={base:'Базовые',prac:'Практика',job:'Как на работе',mix:'Смешанные ↺',rev:'Обзор'};
+const norm=s=>String(s).trim().replace(/[“”«»]/g,'"').replace(/’/g,"'").replace(/\s+/g,' ').replace(/\s*;$/,'');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function exHTML(x,i,state){
+  const [tn,tc]=TYPES[x.t];const mix=x.ref?` <a class="ref" href="#m-${x.ref}">↺ ${MODS[x.ref]?MODS[x.ref].title:x.ref}</a>`:'';
+  let body='';
+  if(x.t==='c'||x.t==='r'){const ord=shuffle(x.o.map((_,k)=>k));body=`<div class="opts">${ord.map(k=>`<button class="opt" data-k="${k}">${x.o[k]}</button>`).join('')}</div>`}
+  if(x.t==='i')body=`<div class="inrow"><span class="k-pr">${x.fix?'✎':'$'}</span><input class="inp" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="${esc(x.ph||'')}"><button class="go">Проверить</button></div>`;
+  if(x.t==='s')body=`<div class="sline"></div><div class="spool">${shuffle(x.p.map((_,k)=>k)).map(k=>`<button class="chip" data-k="${k}">${x.p[k]}</button>`).join('')}</div><button class="go">Проверить</button>`;
+  return `<div class="ex ${tc}${x.ref?' mixd':''}${state===1?' ok':state===0?' no':''}" data-i="${i}"><div class="exh"><span class="tag">${tn}${x.fix?' · исправь':''}</span><span class="num">${i+1}</span>${mix}</div><div class="q">${x.q}</div>${x.code?C(x.code,x.lang||'sh'):''}${body}<div class="fb"></div></div>`}
+function exCheck(x,el){
+  if(x.t==='c'||x.t==='r'){const b=el.querySelector('.opt.sel');return b&&+b.dataset.k===x.a}
+  if(x.t==='i'){const v=norm(el.querySelector('.inp').value);return x.a.some(a=>norm(a)===v)}
+  if(x.t==='s'){const ks=[...el.querySelectorAll('.sline .chip')].map(b=>x.p[+b.dataset.k]);return ks.length===x.p.length&&ks.every((s,k)=>s===x.p[k])}}
+function exRight(x){
+  if(x.t==='c'||x.t==='r')return x.o[x.a];
+  if(x.t==='i')return `<code>${hlSh(x.a[0])}</code>`;
+  return `<ol>${x.p.map(s=>`<li>${s}</li>`).join('')}</ol>`}
+/* Приложение: прогресс (localStorage), маршруты, экраны.
+   #home главная · #m-<id>-<вкладка> модуль (theory|ex|lab|qa) · #cheat · #qa · #todo «Надо разобрать» */
+const KEY='devops-v1';
+const P=Object.assign({done:{},open:{},todo:[],lab:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
+const $=s=>document.querySelector(s);
+const score=id=>{const m=MODS[id],d=P.done[id]||{};const n=m.ex.length;const ok=Object.values(d).filter(v=>v===1).length;return {n,ok,pct:n?ok/n:0}};
+const unlocked=id=>{const i=ORDER.indexOf(id);if(i<=0||P.open[id])return true;const prev=ORDER[i-1];return score(prev).pct>=PASS&&unlocked(prev)};
+const groupOf=x=>x.ref?'mix':x.g||'base';
+const plain=s=>String(s).replace(/<[^>]+>/g,'');
+
+function side(cur){
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
+    return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
+
+function home(){
+  const total=ORDER.reduce((a,id)=>a+MODS[id].ex.length,0),ok=ORDER.reduce((a,id)=>a+score(id).ok,0);
+  return `<h1>DevOps по-тихому</h1><p class="sub">Linux → Docker → Kubernetes → CI/CD → Terraform → Собес. Цель — понимать, что происходит в системе и почему.</p>
+  ${BOX('Как работать с тетрадью',`<ol><li><b>Теория</b> — сначала «что это и зачем», потом суть. Команды не зубри: пойми, что они делают.</li><li><b>Практика</b> — задания. Следующий модуль откроется при ${PASS*100}% верных.</li><li><b>Лаба</b> — главное. Делай руками в терминале <b>без ИИ</b>. Застрял — <code>man</code>, <code>--help</code>, потом подсказка, и только потом решение.</li><li><b>Собес</b> — проговори ответ вслух, потом открой. Раздел «Собес каждый день» собирает вопросы всех открытых тем.</li><li>Не понял — жми «В разобрать», тема уйдёт в список.</li></ol>`)}
+  <div class="stats"><div><b>${ORDER.length}</b>модулей готово</div><div><b>${ok}/${total}</b>заданий решено</div><div><b>${P.todo.length}</b>надо разобрать</div></div>
+  <p class="muted">Прогресс хранится в этом браузере. На другом устройстве открывай модули кнопкой «Открыть без прохождения».</p>`}
+
+function modView(id,tab){
+  const m=MODS[id];if(!m)return '<p>Нет такого модуля.</p>';
+  const u=unlocked(id),s=score(id),i=ORDER.indexOf(id),next=ORDER[i+1];
+  const tabs=[['theory','Теория'],['ex',`Практика ${s.ok}/${s.n}`],['lab',`Лаба ${m.lab.length}`],['qa',`Собес ${m.qa.length}`]]
+    .filter(([k])=>(k!=='lab'||m.lab.length)&&(k!=='qa'||m.qa.length)&&(k!=='theory'||m.theory));
+  if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
+  let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
+  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
+  if(tab==='ex'){
+    if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
+    const d=P.done[id]||{};let last='';
+    h+=`<div class="bar"><span>Верно: ${s.ok} из ${s.n} (${s.pct*100|0}%)</span><button class="reset" data-id="${id}">Сбросить</button></div>`;
+    m.ex.forEach((x,k)=>{const g=m.review?'rev':groupOf(x);if(g!==last){h+=`<h3 class="grp">${GROUPS[g]}</h3>`;last=g}h+=exHTML(x,k,d[k])});
+    if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#m-${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
+  if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. Делай на своей машине (WSL, VirtualBox с Ubuntu, VPS) — не на рабочем сервере.</p>','warn')+
+    m.lab.map((l,k)=>{const dn=(P.lab[id]||{})[k];return `<div class="lab${dn?' ok':''}"><div class="exh"><span class="tag">Лаба ${k+1}</span><label><input type="checkbox" class="labdone" data-id="${id}" data-k="${k}"${dn?' checked':''}> сделал сам</label></div><div class="q">${l.t}</div>${l.h?`<details><summary>Подсказка</summary>${l.h}</details>`:''}${l.chk?`<details><summary>Как проверить себя</summary>${l.chk}</details>`:''}${l.sol?`<details class="sol"><summary>Решение (только после попытки)</summary>${l.sol}</details>`:''}</div>`}).join('');
+  if(tab==='qa')h+=`<p class="muted">Сначала ответь вслух сам, потом раскрой.</p>`+m.qa.map(([q,a])=>`<details class="qa"><summary>${q}</summary><div>${a}</div></details>`).join('');
+  return h}
+
+function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wide" placeholder="Поиск: tail, права, порт…">`+ORDER.filter(id=>MODS[id].cheat.length).map(id=>`<section class="cs"><h3><a href="#m-${id}">${MODS[id].title}</a></h3>${CMDS(MODS[id].cheat)}</section>`).join('')}
+function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
+  return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
+    shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
+function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
+
+function route(){
+  let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
+  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():home();
+  side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
+addEventListener('hashchange',route);
+
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('button,input[type=checkbox]');if(!t)return;
+  const cl=n=>t.classList.contains(n);
+  if(t.id==='burger')return document.body.classList.toggle('menu');
+  if(cl('force')){P.open[t.dataset.id]=true;save();return route()}
+  if(cl('reset')){if(t.dataset.sure){delete P.done[t.dataset.id];save();route()}else{t.dataset.sure=1;t.textContent='Точно сбросить? Нажми ещё раз'}return}
+  if(cl('labdone')){(P.lab[t.dataset.id]=P.lab[t.dataset.id]||{})[t.dataset.k]=t.checked;save();t.closest('.lab').classList.toggle('ok',t.checked);return}
+  if(cl('totodo')){if(!P.todo.includes(t.dataset.t))P.todo.push(t.dataset.t);save();t.textContent='Добавлено ✓';return}
+  if(t.id==='tda'){const v=$('#tdi').value.trim();if(v){P.todo.push(v);save();route()}return}
+  if(cl('tdx')){P.todo.splice(+t.dataset.k,1);save();return route()}
+  const el=t.closest('.ex');if(!el)return;
+  const id=location.hash.slice(1).split('-')[1],k=+el.dataset.i,x=MODS[id].ex[k];
+  if(cl('chip')){(t.parentNode.classList.contains('spool')?el.querySelector('.sline'):el.querySelector('.spool')).appendChild(t);return}
+  if(cl('opt')){el.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));t.classList.add('sel')}
+  if(cl('opt')||cl('go')){
+    const ok=!!exCheck(x,el);(P.done[id]=P.done[id]||{})[k]=ok?1:0;save();
+    el.classList.toggle('ok',ok);el.classList.toggle('no',!ok);
+    el.querySelector('.fb').innerHTML=`<div class="res">${ok?'✓ Верно':'✗ Неверно'}</div>${ok?'':`<div class="right">Правильно: ${exRight(x)}</div>`}<div class="why">${x.e}</div><button class="totodo" data-t="${esc((MODS[id].title+': '+plain(x.q)).slice(0,140))}">В разобрать</button>`;
+    const s=score(id),b=$('.bar span');if(b)b.textContent=`Верно: ${s.ok} из ${s.n} (${s.pct*100|0}%)`;side(id)}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.classList.contains('inp')){const g=ev.target.parentNode.querySelector('.go');g&&g.click()}});
+document.addEventListener('input',ev=>{if(ev.target.id==='cs'){const v=ev.target.value.toLowerCase();document.querySelectorAll('.cs tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(v)?'':'none')}});
+route();</script>

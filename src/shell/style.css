@@ -1,4 +1,4 @@
-:root{--bg:#0f1417;--pn:#161d21;--pn2:#1d262b;--ln:#2a363d;--tx:#d7e0e4;--mu:#8a9aa2;--ac:#4fd18b;
+:root{color-scheme:dark;--bg:#0f1417;--pn:#161d21;--pn2:#1d262b;--ln:#2a363d;--tx:#d7e0e4;--mu:#8a9aa2;--ac:#4fd18b;
 --c:#5aa9ff;--i:#f2c94c;--s:#b48cff;--r:#3dd6c6;--mix:#ff9f5a;--ok:#4fd18b;--no:#ff6b6b;
 --k-cmd:#4fd18b;--k-flag:#f2c94c;--k-path:#5aa9ff;--k-var:#ff9f5a;--k-str:#e6a6ff;--k-com:#6f8088;--k-op:#ff6b9a}
 *{box-sizing:border-box}

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DevOps по-тихому</title><style>:root{--bg:#0f1417;--pn:#161d21;--pn2:#1d262b;--ln:#2a363d;--tx:#d7e0e4;--mu:#8a9aa2;--ac:#4fd18b;
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DevOps по-тихому</title><style>:root{color-scheme:dark;--bg:#0f1417;--pn:#161d21;--pn2:#1d262b;--ln:#2a363d;--tx:#d7e0e4;--mu:#8a9aa2;--ac:#4fd18b;
 --c:#5aa9ff;--i:#f2c94c;--s:#b48cff;--r:#3dd6c6;--mix:#ff9f5a;--ok:#4fd18b;--no:#ff6b6b;
 --k-cmd:#4fd18b;--k-flag:#f2c94c;--k-path:#5aa9ff;--k-var:#ff9f5a;--k-str:#e6a6ff;--k-com:#6f8088;--k-op:#ff6b9a}
 *{box-sizing:border-box}
@@ -513,7 +513,7 @@ const GROUPS={base:'Базовые',prac:'Практика',job:'Как на р�
 const norm=s=>String(s).trim().replace(/[“”«»]/g,'"').replace(/’/g,"'").replace(/\s+/g,' ').replace(/\s*;$/,'');
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 function exHTML(x,i,state){
-  const [tn,tc]=TYPES[x.t];const mix=x.ref?` <a class="ref" href="#/m/${x.ref}">↺ ${MODS[x.ref]?MODS[x.ref].title:x.ref}</a>`:'';
+  const [tn,tc]=TYPES[x.t];const mix=x.ref?` <a class="ref" href="#m-${x.ref}">↺ ${MODS[x.ref]?MODS[x.ref].title:x.ref}</a>`:'';
   let body='';
   if(x.t==='c'||x.t==='r'){const ord=shuffle(x.o.map((_,k)=>k));body=`<div class="opts">${ord.map(k=>`<button class="opt" data-k="${k}">${x.o[k]}</button>`).join('')}</div>`}
   if(x.t==='i')body=`<div class="inrow"><span class="k-pr">${x.fix?'✎':'$'}</span><input class="inp" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="${esc(x.ph||'')}"><button class="go">Проверить</button></div>`;
@@ -528,10 +528,10 @@ function exRight(x){
   if(x.t==='i')return `<code>${hlSh(x.a[0])}</code>`;
   return `<ol>${x.p.map(s=>`<li>${s}</li>`).join('')}</ol>`}
 /* Приложение: прогресс (localStorage), маршруты, экраны.
-   #/ главная · #/m/<id>/<вкладка> модуль (theory|ex|lab|qa) · #/cheat шпаргалка · #/qa собес-карточки · #/todo «Надо разобрать» */
+   #home главная · #m-<id>-<вкладка> модуль (theory|ex|lab|qa) · #cheat · #qa · #todo «Надо разобрать» */
 const KEY='devops-v1';
-const P=Object.assign({done:{},open:{},todo:[],lab:{}},JSON.parse(localStorage.getItem(KEY)||'{}'));
-const save=()=>localStorage.setItem(KEY,JSON.stringify(P));
+const P=Object.assign({done:{},open:{},todo:[],lab:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
 const $=s=>document.querySelector(s);
 const score=id=>{const m=MODS[id],d=P.done[id]||{};const n=m.ex.length;const ok=Object.values(d).filter(v=>v===1).length;return {n,ok,pct:n?ok/n:0}};
 const unlocked=id=>{const i=ORDER.indexOf(id);if(i<=0||P.open[id])return true;const prev=ORDER[i-1];return score(prev).pct>=PASS&&unlocked(prev)};
@@ -539,9 +539,9 @@ const groupOf=x=>x.ref?'mix':x.g||'base';
 const plain=s=>String(s).replace(/<[^>]+>/g,'');
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#/">⌂ Главная</a><a class="sl" href="#/qa">🎴 Собес каждый день</a><a class="sl" href="#/cheat">📋 Шпаргалка</a><a class="sl" href="#/todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
-    return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#/m/${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
+    return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
 function home(){
   const total=ORDER.reduce((a,id)=>a+MODS[id].ex.length,0),ok=ORDER.reduce((a,id)=>a+score(id).ok,0);
@@ -556,27 +556,27 @@ function modView(id,tab){
   const tabs=[['theory','Теория'],['ex',`Практика ${s.ok}/${s.n}`],['lab',`Лаба ${m.lab.length}`],['qa',`Собес ${m.qa.length}`]]
     .filter(([k])=>(k!=='lab'||m.lab.length)&&(k!=='qa'||m.qa.length)&&(k!=='theory'||m.theory));
   if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
-  let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#/m/${id}/${k}">${n}</a>`).join('')}</nav>`;
+  let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
   if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
     const d=P.done[id]||{};let last='';
     h+=`<div class="bar"><span>Верно: ${s.ok} из ${s.n} (${s.pct*100|0}%)</span><button class="reset" data-id="${id}">Сбросить</button></div>`;
     m.ex.forEach((x,k)=>{const g=m.review?'rev':groupOf(x);if(g!==last){h+=`<h3 class="grp">${GROUPS[g]}</h3>`;last=g}h+=exHTML(x,k,d[k])});
-    if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#/m/${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
+    if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#m-${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
   if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. Делай на своей машине (WSL, VirtualBox с Ubuntu, VPS) — не на рабочем сервере.</p>','warn')+
     m.lab.map((l,k)=>{const dn=(P.lab[id]||{})[k];return `<div class="lab${dn?' ok':''}"><div class="exh"><span class="tag">Лаба ${k+1}</span><label><input type="checkbox" class="labdone" data-id="${id}" data-k="${k}"${dn?' checked':''}> сделал сам</label></div><div class="q">${l.t}</div>${l.h?`<details><summary>Подсказка</summary>${l.h}</details>`:''}${l.chk?`<details><summary>Как проверить себя</summary>${l.chk}</details>`:''}${l.sol?`<details class="sol"><summary>Решение (только после попытки)</summary>${l.sol}</details>`:''}</div>`}).join('');
   if(tab==='qa')h+=`<p class="muted">Сначала ответь вслух сам, потом раскрой.</p>`+m.qa.map(([q,a])=>`<details class="qa"><summary>${q}</summary><div>${a}</div></details>`).join('');
   return h}
 
-function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wide" placeholder="Поиск: tail, права, порт…">`+ORDER.filter(id=>MODS[id].cheat.length).map(id=>`<section class="cs"><h3><a href="#/m/${id}">${MODS[id].title}</a></h3>${CMDS(MODS[id].cheat)}</section>`).join('')}
+function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wide" placeholder="Поиск: tail, права, порт…">`+ORDER.filter(id=>MODS[id].cheat.length).map(id=>`<section class="cs"><h3><a href="#m-${id}">${MODS[id].title}</a></h3>${CMDS(MODS[id].cheat)}</section>`).join('')}
 function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
   return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
-    shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#/m/${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
+    shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
-  const [,a,id,tab]=location.hash.split('/');
+  let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
   $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():home();
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
@@ -586,13 +586,13 @@ document.addEventListener('click',ev=>{
   const cl=n=>t.classList.contains(n);
   if(t.id==='burger')return document.body.classList.toggle('menu');
   if(cl('force')){P.open[t.dataset.id]=true;save();return route()}
-  if(cl('reset')){if(confirm('Сбросить прогресс модуля?')){delete P.done[t.dataset.id];save();route()}return}
+  if(cl('reset')){if(t.dataset.sure){delete P.done[t.dataset.id];save();route()}else{t.dataset.sure=1;t.textContent='Точно сбросить? Нажми ещё раз'}return}
   if(cl('labdone')){(P.lab[t.dataset.id]=P.lab[t.dataset.id]||{})[t.dataset.k]=t.checked;save();t.closest('.lab').classList.toggle('ok',t.checked);return}
   if(cl('totodo')){if(!P.todo.includes(t.dataset.t))P.todo.push(t.dataset.t);save();t.textContent='Добавлено ✓';return}
   if(t.id==='tda'){const v=$('#tdi').value.trim();if(v){P.todo.push(v);save();route()}return}
   if(cl('tdx')){P.todo.splice(+t.dataset.k,1);save();return route()}
   const el=t.closest('.ex');if(!el)return;
-  const id=location.hash.split('/')[2],k=+el.dataset.i,x=MODS[id].ex[k];
+  const id=location.hash.slice(1).split('-')[1],k=+el.dataset.i,x=MODS[id].ex[k];
   if(cl('chip')){(t.parentNode.classList.contains('spool')?el.querySelector('.sline'):el.querySelector('.spool')).appendChild(t);return}
   if(cl('opt')){el.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));t.classList.add('sel')}
   if(cl('opt')||cl('go')){
