@@ -1,0 +1,11 @@
+{
+  "name": "devops-workbook",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Рабочая тетрадь DevOps: исходники в src/, сборка в один index.html",
+  "scripts": {
+    "build": "node build.js",
+    "check": "node check.js",
+    "map": "node check.js --map"
+  }
+}
