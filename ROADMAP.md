@@ -28,7 +28,7 @@ Node.js CRUD API + **MS SQL Server** (Oracle — легаси-тикет 1.5) �
 | 11 | pkgs | Пакеты: apt, репозитории, версии | ✅ |
 | 12 | bash1 | Bash-скрипты 1: shebang, переменные, кавычки, $?, if, for, set -euo pipefail | ✅ |
 | 13 | bash2 | Bash-скрипты 2: функции, $1 $@, trap, cron | ✅ |
-| 14 | pwsh | PowerShell (.ps1) для DevOps: объекты вместо текста, соответствия bash | ⬜ |
+| 14 | pwsh | PowerShell (.ps1) для DevOps: объекты вместо текста, соответствия bash | ✅ |
 | 15 | net1 | Сеть: IP, маска, порты, TCP/UDP, ss, curl, ping | ⬜ |
 | 16 | r2 | **Обзор 2** (1–15) | ⬜ |
 | 17 | dns | DNS и HTTP: dig, /etc/hosts, коды, заголовки | ⬜ |
