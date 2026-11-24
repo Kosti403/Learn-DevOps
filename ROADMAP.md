@@ -31,7 +31,7 @@ Node.js CRUD API + **MS SQL Server** (Oracle — легаси-тикет 1.5) �
 | 14 | pwsh | PowerShell (.ps1) для DevOps: объекты вместо текста, соответствия bash | ✅ |
 | 15 | net1 | Сеть: IP, маска, порты, TCP/UDP, ss, curl, ping | ✅ |
 | 16 | r2 | **Обзор 2** (1–15) | ✅ |
-| 17 | dns | DNS и HTTP: dig, /etc/hosts, коды, заголовки | ⬜ |
+| 17 | dns | DNS и HTTP: dig, /etc/hosts, коды, заголовки | ✅ |
 | 18 | ssh | SSH: рукопожатие, ключи хоста и пользователя, ed25519/rsa/ecdsa, known_hosts, agent, config | ⬜ |
 | 19 | fw | Firewall: ufw, iptables | ⬜ |
 | 20 | nginx | Nginx: reverse proxy, upstream, A/B-слоты, nginx -t | ⬜ |
