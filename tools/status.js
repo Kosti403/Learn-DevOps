@@ -5,6 +5,10 @@ const {files,S}=require(path.join(__dirname,'..','build.js'));
 const ctx={};vm.createContext(ctx);
 vm.runInContext(files().filter(f=>!f.startsWith('engine/app')).map(f=>fs.readFileSync(S(f),'utf8')).join('\n;')+';this.MODS=MODS;this.LEVELS=LEVELS;this.ORDER=ORDER;this.TICKETS=TICKETS;',ctx);
 const {MODS,LEVELS,ORDER,TICKETS}=ctx;
+/* Обязательные пункты «до следующего шага» — из CLAUDE.md (строки «- [ ]» в разделе ⚠️) */
+try{const md=fs.readFileSync(path.join(__dirname,'..','CLAUDE.md'),'utf8');const sec=md.split('## ⚠️')[1];
+  if(sec){const todo=sec.split('\n## ')[0].split('\n').filter(l=>l.startsWith('- [ ]'));
+    if(todo.length){console.log('\n⚠️  СНАЧАЛА — обязательные пункты из CLAUDE.md:');todo.forEach(l=>console.log('   '+l.replace(/\*\*/g,'').slice(0,110)))}}}catch(e){}
 let next=null,doneN=0,allN=0;
 console.log('\n=== Курс: готово / план ===');
 for(const l of LEVELS){const d=l.ids.filter(id=>MODS[id]),t=l.ids.filter(id=>!MODS[id]);doneN+=d.length;allN+=l.ids.length;
