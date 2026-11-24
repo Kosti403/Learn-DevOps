@@ -10,7 +10,7 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'
 const CMDWORD=/^(sudo|time|watch|xargs|exec|env)$/;
 function hlSh(line){
   if(/^\s*#/.test(line))return `<i class="k-com">${esc(line)}</i>`;
-  let out='',first=true,m;const re=/(\s+)|("(?:[^"\\]|\\.)*"|'[^']*')|(\|\||&&|\||;|>>|2>&1|>|<)|(#.*$)|([^\s|;&<>]+)/g;
+  let out='',first=true,m;const re=/(\s+)|("(?:[^"\\]|\\.)*"|'[^']*')|(\|\||&&|\||;|>>|2>&1|>&2|&>>|&>|>|<|&)|(#.*$)|([^\s|;&<>]+)/g;
   while((m=re.exec(line))){
     if(m[1]){out+=m[1];continue}
     if(m[2]){out+=`<span class="k-str">${esc(m[2])}</span>`;continue}
