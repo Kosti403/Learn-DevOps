@@ -6,6 +6,8 @@
   "scripts": {
     "build": "node build.js",
     "check": "node check.js",
-    "map": "node check.js --map"
+    "map": "node check.js --map",
+    "status": "node tools/status.js",
+    "new": "node tools/new-module.js"
   }
 }

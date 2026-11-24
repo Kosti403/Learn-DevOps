@@ -11,8 +11,11 @@ ORDER.forEach((id,i)=>{const m=MODS[id];
   if(m.ex.length<20||m.ex.length>28)console.log(`! ${id}: заданий ${m.ex.length} (норма 22–28)`);
   const okTags=/^(p|b|i|a|ol|ul|li|code|mark|h2|h3|br|div|span|table|thead|tbody|tr|td|th|pre|details|summary|section|em|strong|sup|sub|small|u)$/;
   const txt=JSON.stringify([m.intro,m.theory,m.memo,m.traps,m.ex,m.lab,m.qa]);(txt.match(/<\/?[a-zA-Zа-яА-Я][^\s>\/]*/g)||[]).forEach(t=>{if(!okTags.test(t.replace(/[</]/g,'')))bad(id,-1,'странный тег '+t)});
+  if(/TODO/.test(JSON.stringify(m)))bad(id,-1,'остался TODO в тексте модуля');
+  m.lab.forEach((l,j)=>{if(!l.h&&!l.chk&&!l.sol)bad(id,j,'лаба без подсказки/проверки/решения (h, chk или sol)')});
+  if(m.ex.length<20)bad(id,-1,'заданий меньше 20');
   m.ex.forEach((x,k)=>{
-    if(!x.e)bad(id,k,'нет пояснения');
+    if(!x.e)bad(id,k,'нет пояснения');else if(String(x.e).replace(/<[^>]+>/g,'').length<30)bad(id,k,'пояснение «почему» слишком короткое (<30 символов)');
     if(!'cris'.includes(x.t))bad(id,k,'тип '+x.t);
     if((x.t==='c'||x.t==='r')&&!(x.o&&x.o[x.a]!==undefined))bad(id,k,'нет верного варианта');
     if((x.t==='c'||x.t==='r')&&new Set(x.o).size!==x.o.length)bad(id,k,'повтор вариантов');
