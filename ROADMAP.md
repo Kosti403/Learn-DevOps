@@ -7,7 +7,7 @@
 Статус: ✅ готов · 🛠 в работе · ⬜ не начат
 
 ## Сквозной проект «Магазин» (`src/course/project.js`, экран #project)
-Node.js CRUD API → голый сервер (systemd, nginx, ssh, ufw) → Docker/Compose → Kubernetes → Helm → GitLab CI/CD (+Vault) → Prometheus/Grafana → Terraform → README, инцидент, рассказ, резюме. 8 спринтов, 37 тикетов, у каждого: зачем · что сделать · готово, когда · какие модули готовят.
+Node.js CRUD API + **MS SQL Server** (Oracle — легаси-тикет 1.5) → голый сервер в WSL (systemd, nginx, ssh, ufw; VPS по желанию, тикет 0.10) → Docker/Compose → Kubernetes → Helm → GitLab CI/CD (+Vault) → Prometheus/Grafana → Terraform → README, инцидент, рассказ, резюме. 8 спринтов, 37 тикетов, у каждого: зачем · что сделать · готово, когда · какие модули готовят.
 - **Курс первичен, проект подстраивается под курс.** Модули пишутся по своей логике (темы, порядок, ситуации — любые жизненные). Проект — практика по уже пройденному: тикет открывается, когда пройдены его модули (`need`). Изменился состав или порядок модулей — правим тикеты, а не модули.
 - После модуля, который закрывает подготовку тикета, в модуле появляется блок «🛠 В проекте» (сам, по `need`).
 - **Разбор инцидента** в конце каждого уровня (inc1, inc2, incident, inc4): длинная задача без вариантов — дан вывод нескольких команд, найти причину самому, записать «симптом → диагностика → причина → исправление».
@@ -57,7 +57,7 @@ Node.js CRUD API → голый сервер (systemd, nginx, ssh, ufw) → Dock
 k8sarch (control plane/worker, 1:55) · k8scomp (api-server, etcd, scheduler, controller-manager, 1:59) · raft (кворум, 2:22) · kubectl (kubeconfig, контекст, RBAC, 2:17) · pod (sidecar, сеть пода, CNI, 2:33–2:58) · deploy (rolling update, drain, PDB, 2:58–3:15) · sts (StatefulSet, DaemonSet, 3:15) · probes (3:23) · qos (requests/limits, 3:28) · svc (Service, kube-proxy, DNS, 3:33) · ingress (4:02) · cfg (ConfigMap/Secret, base64 ≠ шифрование, 4:12–4:37) · jobs (Job/CronJob/CRD/Namespace, 4:41) · storage (PV/PVC/StorageClass, 4:46) · helm · incident (разбор поломки: selector 4:08, Pending, CrashLoop)
 
 ## Уровень 4 · Доставка и инфраструктура (Л4) — около половины смешанных
-gitlabci · runners · vault · tf1 (IaC, provider, plan/apply) · tfstate (state, remote backend, S3: versioning, запрет удаления, откат версии, lock) · tfmod (variables, workspaces, modules, Terragrunt) · prom (Prometheus, метрики) · grafana (RPS, p95, error rate, алерты) · bluegreen (деплой-стратегии) · sql (быстрое повторение) · **inc4** (разбор инцидента: пайплайн, state, алерты)
+gitlabci · runners · vault · tf1 (IaC, provider, plan/apply) · tfstate (state, remote backend, S3: versioning, запрет удаления, откат версии, lock) · tfmod (variables, workspaces, modules, Terragrunt) · prom (Prometheus, метрики) · grafana (RPS, p95, error rate, алерты) · bluegreen (деплой-стратегии) · sql (MS SQL / T-SQL: sqlcmd, SSMS/dbForge, логины и роли, бэкап и восстановление, лицензии Developer/Express; основы Oracle: sqlplus, схемы, DBeaver) · **inc4** (разбор инцидента: пайплайн, state, алерты)
 
 ## Уровень 5 · Собес
 Сценарии «прод упал», вопросы по всем темам, разбор «почему».
