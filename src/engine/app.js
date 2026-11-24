@@ -11,7 +11,7 @@ const linkRefs=h=>String(h).replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?`<a cl
 const plain=s=>String(s).replace(/<[^>]+>/g,'').replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?String(ORDER.indexOf(id)+1):id);
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#links">🔗 Ссылки</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
     return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
@@ -31,9 +31,10 @@ function modView(id,tab){
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
   const early=earlyTerms(id);const caseBox=m.case?`<section class="case"><h2>Ситуация</h2>${m.case}</section>`:'';const earlyBox=early.length?`<details class="early"><summary>В этом модуле встретятся инструменты, которых ещё не было (${early.length}). Что это и зачем они нужны — раскрой</summary>${early.map(t=>termHTML(t)).join('')}</details>`:'';
   const tk=ticketsAfter(id);const projBox=tk.length?`<section class="projbox"><h2>🛠 В проекте «Магазин»</h2><p>После этого модуля можно делать:</p>${tk.map(t=>`<p>→ <a href="#project">Тикет ${t.id} · ${t.t}</a> — ${t.why}</p>`).join('')}</section>`:'';
+  const lk=linksFor(id);const linkBox=lk.length?`<section class="linkbox"><h2>📚 Почитать по теме</h2><ul class="links">${lk.map(linkHTML).join('')}</ul></section>`:'';
   if(tab==='theory')h+=caseBox;
   if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
-  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox;
+  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox+linkBox;
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
     const d=P.done[id]||{};let last='';
@@ -55,12 +56,14 @@ const ready=t=>t.need.every(id=>MODS[id]&&score(id).pct>=PASS);
 function ticketHTML(t){const dn=P.proj[t.id],r=ready(t);return `<div class="ticket${dn?' ok':''}"><div class="exh"><span class="tag">Тикет ${t.id}</span><span class="${r?'rdy':'nrdy'}">${dn?'сделано':r?'можно делать':'сначала пройди модули'}</span><label><input type="checkbox" class="projdone" data-id="${t.id}"${dn?' checked':''}> сделал</label></div><h3>${t.t}</h3><p><b>Зачем:</b> ${t.why}</p><p><b>Что сделать:</b> ${t.do}</p><p><b>Готово, когда:</b> ${t.done}</p>${t.hint?`<details><summary>Подсказка</summary>${t.hint}</details>`:''}<p class="muted">Готовят модули: ${t.need.map(modLink).join(' · ')}</p></div>`}
 function project(){const n=TICKETS.length,d=TICKETS.filter(t=>P.proj[t.id]).length;
   return `<h1>Проект «Магазин»</h1><p class="sub">${PROJECT.goal}</p>`+BOX('Как работать с проектом','<p>Это не задания с ответами, а настоящая работа: делаешь руками на своём сервере, без ИИ, и коммитишь в свой GitLab. Тикет становится «можно делать», когда пройдены модули, которые к нему готовят. Модули объясняют, <b>как</b>; проект показывает, <b>зачем</b> всё это вместе.</p>')+`<div class="stats"><div><b>${d}/${n}</b>тикетов сделано</div></div>`+PROJECT.sprints.map(s=>`<section><h2>${s.n}</h2><p class="sub">${s.goal}</p>${s.tickets.map(ticketHTML).join('')}</section>`).join('')}
+const linkHTML=l=>`<li><a href="${l.u}" target="_blank" rel="noopener noreferrer">${l.t}</a><span class="muted"> — ${l.n}</span></li>`;
+function links(){const gs=[...new Set(LINKS.map(l=>l.g))];return `<h1>Ссылки</h1><p class="sub">Из твоих заметок. Ссылки по теме также показываются внизу теории нужного модуля.</p>`+gs.map(g=>`<section><h2>${g}</h2><ul class="links">${LINKS.filter(l=>l.g===g).map(linkHTML).join('')}</ul></section>`).join('')}
 function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Каждый инструмент: что это, зачем он вообще нужен, где живёт на сервере и в какой ситуации ты с ним столкнёшься.</p>`+TERMS.map(t=>termHTML(t)).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=linkRefs(a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home());
+  $('#main').innerHTML=linkRefs(a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():a==='links'?links():home());
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 

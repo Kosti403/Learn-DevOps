@@ -2,7 +2,7 @@
 const {build,files,S}=require('./build.js'),fs=require('fs'),vm=require('vm');
 const info=build();
 const ctx={console};vm.createContext(ctx);
-const src=files().filter(f=>!f.startsWith('engine/app')).map(f=>fs.readFileSync(S(f),'utf8')).join('\n')+';this.MODS=MODS;this.ORDER=ORDER;this.TICKETS=TICKETS;this.LEVELS=LEVELS;';
+const src=files().filter(f=>!f.startsWith('engine/app')).map(f=>fs.readFileSync(S(f),'utf8')).join('\n')+';this.MODS=MODS;this.ORDER=ORDER;this.TICKETS=TICKETS;this.LINKS=LINKS;this.LEVELS=LEVELS;';
 vm.runInContext(src,ctx);
 const {MODS,ORDER}=ctx;let err=0;const bad=(id,k,m)=>{err++;console.log(`✗ ${id}#${k+1}: ${m}`)};
 if(process.argv.includes('--map'))ORDER.forEach((id,i)=>{const m=MODS[id];console.log(String(i+1).padStart(2),m.lvl.padEnd(3),id.padEnd(9),String(m.ex.length).padStart(3),'заданий','лаб',m.lab.length,'qa',m.qa.length,'·',m.title)});
@@ -20,5 +20,5 @@ ORDER.forEach((id,i)=>{const m=MODS[id];
     if(x.t==='s'&&!(x.p&&x.p.length>1))bad(id,k,'нет шагов');
     if(x.ref&&!(ORDER.indexOf(x.ref)>-1&&ORDER.indexOf(x.ref)<i))bad(id,k,'ref не назад: '+x.ref)})});
 ORDER.forEach(id=>{for(const m of JSON.stringify(MODS[id]).matchAll(/\[\[mod:(\w+)\]\]/g))if(!ctx.LEVELS.flatMap(l=>l.ids).includes(m[1]))bad(id,-1,'ссылка на модуль вне плана: '+m[1])});
-const plan=ctx.LEVELS.flatMap(l=>l.ids);ctx.TICKETS.forEach(t=>t.need.forEach(n=>{if(!plan.includes(n))bad('project',-1,'тикет '+t.id+': модуля '+n+' нет в плане')}));
+const plan=ctx.LEVELS.flatMap(l=>l.ids);ctx.LINKS.forEach(l=>{if(!/^https:\/\//.test(l.u))bad('links',-1,'не https: '+l.u);l.mod.forEach(n=>{if(!plan.includes(n))bad('links',-1,'модуля '+n+' нет в плане')})});ctx.TICKETS.forEach(t=>t.need.forEach(n=>{if(!plan.includes(n))bad('project',-1,'тикет '+t.id+': модуля '+n+' нет в плане')}));
 console.log(err?`Ошибок: ${err}`:'✓ ошибок нет',info);process.exit(err?1:0);

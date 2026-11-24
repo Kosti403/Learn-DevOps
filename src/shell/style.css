@@ -90,3 +90,5 @@ button:hover{border-color:var(--mu)}
 .rdy{color:var(--ok)}.nrdy{color:var(--mu)}
 .projbox{background:var(--pn);border:1px dashed var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:20px}.projbox h2{color:var(--mix)}
 .mref{font-weight:700;text-decoration:none;border-bottom:1px dashed var(--c)}
+
+.links{padding-left:20px}.links li{margin:6px 0}.linkbox{margin-top:20px}

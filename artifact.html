@@ -89,7 +89,9 @@ button:hover{border-color:var(--mu)}
 .ticket{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--mix);border-radius:10px;padding:10px 16px;margin:12px 0}.ticket.ok{opacity:.7;border-left-color:var(--ok)}.ticket h3{margin:.2em 0 .5em}.ticket .tag{color:var(--mix)}
 .rdy{color:var(--ok)}.nrdy{color:var(--mu)}
 .projbox{background:var(--pn);border:1px dashed var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:20px}.projbox h2{color:var(--mix)}
-.mref{font-weight:700;text-decoration:none;border-bottom:1px dashed var(--c)}</style><button id="burger" aria-label="Меню">☰ Модули</button>
+.mref{font-weight:700;text-decoration:none;border-bottom:1px dashed var(--c)}
+
+.links{padding-left:20px}.links li{margin:6px 0}.linkbox{margin-top:20px}</style><button id="burger" aria-label="Меню">☰ Модули</button>
 <nav id="side"></nav>
 <main id="main"></main><script>/* Помощники для текста модулей. Всё глобально (один файл после сборки).
    esc(s)             — экранировать HTML
@@ -2557,6 +2559,23 @@ const PROJECT={
 const TICKETS=PROJECT.sprints.flatMap(s=>s.tickets.map(t=>Object.assign({sp:s},t)));
 /* Тикеты, для которых этот модуль — последний из нужных по плану (т. е. после него тикет можно делать) */
 const ticketsAfter=id=>{const plan=LEVELS.flatMap(l=>l.ids);return TICKETS.filter(t=>t.need.length&&t.need.reduce((a,b)=>plan.indexOf(a)>plan.indexOf(b)?a:b)===id)};
+/* Полезные ссылки из заметок. mod — id модулей, где ссылка показывается в блоке «Почитать по теме» (модуль может быть ещё в плане — тогда ссылка появится, когда он будет готов).
+   g — раздел на странице #links. Темы статей без подписи не проверялись — они в разделе «Общее». */
+const LINKS=[
+ {g:'Общее',t:'BoostMentor — гайд по DevOps',u:'https://boostmentor.ru/guides/devops',n:'опорный гайд курса: план тем и вопросы',mod:[]},
+ {g:'Общее',t:'Ultimate DevOps Guide (GitHub)',u:'https://github.com/boost-mentor/ultimate-devops-guide',n:'тот же гайд в репозитории',mod:[]},
+ {g:'Общее',t:'Habr: статья (в заметках — «Habr DevOps»)',u:'https://habr.com/ru/articles/865040/',n:'тема не проверялась',mod:[]},
+ {g:'Общее',t:'Habr, МКБ (в заметках — «Habr MKB»)',u:'https://habr.com/ru/companies/mkb/articles/852280/',n:'тема не проверялась',mod:[]},
+ {g:'Общее',t:'Habr, VK: статья 1',u:'https://habr.com/ru/companies/vk/articles/792368/',n:'тема не проверялась',mod:[]},
+ {g:'Общее',t:'Habr, VK: статья 2',u:'https://habr.com/ru/companies/vk/articles/809447/',n:'тема не проверялась',mod:[]},
+ {g:'Контейнеры и Kubernetes',t:'Видео: Kubernetes с нуля (по нему идут уровни 2–3)',u:'https://www.youtube.com/watch?v=6mhlHDJOQAw',n:'тайм-коды разложены по модулям в ROADMAP',mod:['ctr','docker','dfile','multi','dnet','compose','orch','k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage']},
+ {g:'CI/CD и раннеры',t:'Настройка CI/CD для GitLab-репозитория: схемы и гайд по шагам',u:'https://lred.ru/webmasteru/36074-nastrojka-cicd-dlya-gitlab-repozitoriya-skhemy-i-gajd-po-shagam',n:'в заметках — «GitLab CI/CD — настройка пошагово»',mod:['gitlabci']},
+ {g:'CI/CD и раннеры',t:'Reddit r/devops: как подключиться к VPN внутри пайплайна',u:'https://www.reddit.com/r/devops/comments/u2enye/how_to_connect_to_vpn_inside_pipeline/',n:'когда сервер для деплоя доступен только через VPN',mod:['runners','gitlabci']},
+ {g:'CI/CD и раннеры',t:'Reddit r/gitlab: GitLab CI — деплой через VPN',u:'https://www.reddit.com/r/gitlab/comments/a6htul/gitlab_ci_how_to_deploy_via_vpn/?tl=ru',n:'та же задача, обсуждение для GitLab',mod:['runners','gitlabci']},
+ {g:'CI/CD и раннеры',t:'Self-hosted агенты для Azure Pipelines (Medium)',u:'https://vijayasimhabr.medium.com/configure-self-hosted-agents-for-azure-pipelines-devops-933cb58c795a',n:'свой раннер внутри закрытой сети — альтернатива VPN в пайплайне',mod:['runners']},
+ {g:'CI/CD и раннеры',t:'Azure на GitHub (в заметках — «Azure Mission Critical — Private Agents Setup»)',u:'https://github.com/Azure/',n:'ссылка ведёт на всю организацию Azure; нужный репозиторий — поиск «Mission-Critical» внутри',mod:['runners']},
+ {g:'CI/CD и раннеры',t:'Видео по теме (из заметок)',u:'https://www.youtube.com/watch?v=Ce-HDCrXMtQ',n:'в заметках стоит рядом с ссылками про раннеры и VPN; тема не проверялась',mod:[]}];
+const linksFor=id=>LINKS.filter(l=>l.mod.includes(id));
 /* Задания. Общие поля: t (тип), q (вопрос, html), e (почему — обязательно), g (группа), ref (id прошлой темы для ↺), code+lang (блок кода).
    t:'c'  выбор       {o:[варианты], a:индекс верного}        — варианты перемешиваются
    t:'r'  чтение      то же, что 'c', но с логом/конфигом в code
@@ -2595,7 +2614,7 @@ const linkRefs=h=>String(h).replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?`<a cl
 const plain=s=>String(s).replace(/<[^>]+>/g,'').replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?String(ORDER.indexOf(id)+1):id);
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#links">🔗 Ссылки</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
     return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
@@ -2615,9 +2634,10 @@ function modView(id,tab){
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
   const early=earlyTerms(id);const caseBox=m.case?`<section class="case"><h2>Ситуация</h2>${m.case}</section>`:'';const earlyBox=early.length?`<details class="early"><summary>В этом модуле встретятся инструменты, которых ещё не было (${early.length}). Что это и зачем они нужны — раскрой</summary>${early.map(t=>termHTML(t)).join('')}</details>`:'';
   const tk=ticketsAfter(id);const projBox=tk.length?`<section class="projbox"><h2>🛠 В проекте «Магазин»</h2><p>После этого модуля можно делать:</p>${tk.map(t=>`<p>→ <a href="#project">Тикет ${t.id} · ${t.t}</a> — ${t.why}</p>`).join('')}</section>`:'';
+  const lk=linksFor(id);const linkBox=lk.length?`<section class="linkbox"><h2>📚 Почитать по теме</h2><ul class="links">${lk.map(linkHTML).join('')}</ul></section>`:'';
   if(tab==='theory')h+=caseBox;
   if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
-  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox;
+  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox+linkBox;
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
     const d=P.done[id]||{};let last='';
@@ -2639,12 +2659,14 @@ const ready=t=>t.need.every(id=>MODS[id]&&score(id).pct>=PASS);
 function ticketHTML(t){const dn=P.proj[t.id],r=ready(t);return `<div class="ticket${dn?' ok':''}"><div class="exh"><span class="tag">Тикет ${t.id}</span><span class="${r?'rdy':'nrdy'}">${dn?'сделано':r?'можно делать':'сначала пройди модули'}</span><label><input type="checkbox" class="projdone" data-id="${t.id}"${dn?' checked':''}> сделал</label></div><h3>${t.t}</h3><p><b>Зачем:</b> ${t.why}</p><p><b>Что сделать:</b> ${t.do}</p><p><b>Готово, когда:</b> ${t.done}</p>${t.hint?`<details><summary>Подсказка</summary>${t.hint}</details>`:''}<p class="muted">Готовят модули: ${t.need.map(modLink).join(' · ')}</p></div>`}
 function project(){const n=TICKETS.length,d=TICKETS.filter(t=>P.proj[t.id]).length;
   return `<h1>Проект «Магазин»</h1><p class="sub">${PROJECT.goal}</p>`+BOX('Как работать с проектом','<p>Это не задания с ответами, а настоящая работа: делаешь руками на своём сервере, без ИИ, и коммитишь в свой GitLab. Тикет становится «можно делать», когда пройдены модули, которые к нему готовят. Модули объясняют, <b>как</b>; проект показывает, <b>зачем</b> всё это вместе.</p>')+`<div class="stats"><div><b>${d}/${n}</b>тикетов сделано</div></div>`+PROJECT.sprints.map(s=>`<section><h2>${s.n}</h2><p class="sub">${s.goal}</p>${s.tickets.map(ticketHTML).join('')}</section>`).join('')}
+const linkHTML=l=>`<li><a href="${l.u}" target="_blank" rel="noopener noreferrer">${l.t}</a><span class="muted"> — ${l.n}</span></li>`;
+function links(){const gs=[...new Set(LINKS.map(l=>l.g))];return `<h1>Ссылки</h1><p class="sub">Из твоих заметок. Ссылки по теме также показываются внизу теории нужного модуля.</p>`+gs.map(g=>`<section><h2>${g}</h2><ul class="links">${LINKS.filter(l=>l.g===g).map(linkHTML).join('')}</ul></section>`).join('')}
 function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Каждый инструмент: что это, зачем он вообще нужен, где живёт на сервере и в какой ситуации ты с ним столкнёшься.</p>`+TERMS.map(t=>termHTML(t)).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=linkRefs(a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home());
+  $('#main').innerHTML=linkRefs(a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():a==='links'?links():home());
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 
