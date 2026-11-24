@@ -24,7 +24,7 @@ Node.js CRUD API → голый сервер (systemd, nginx, ssh, ufw) → Dock
 | 7 | procs | Процессы и сигналы: ps, kill, SIGTERM/SIGKILL, фон, nohup | ✅ |
 | 8 | r1 | **Обзор 1** (1–7) | ✅ |
 | 9 | res | «Сервер тормозит»: load average, top, free, vmstat, iostat, df/du → кто → почему (strace, lsof, логи) | ✅ |
-| 10 | systemd | systemd, unit-файлы, journalctl | ⬜ |
+| 10 | systemd | systemd, unit-файлы, journalctl | ✅ |
 | 11 | pkgs | Пакеты: apt, репозитории, версии | ⬜ |
 | 12 | bash1 | Bash-скрипты 1: shebang, переменные, кавычки, $?, if, for, set -euo pipefail | ⬜ |
 | 13 | bash2 | Bash-скрипты 2: функции, $1 $@, trap, cron | ⬜ |
