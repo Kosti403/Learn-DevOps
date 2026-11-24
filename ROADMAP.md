@@ -12,7 +12,7 @@
 | 1 | linux | Что такое Linux: ядро, дистрибутивы, Ubuntu и LTS, почему Ubuntu на проде | ✅ |
 | 2 | shell | Терминал: bash/sh/zsh, пути, навигация, man/--help, `.sh` vs `.ps1` | ✅ |
 | 3 | files | Файлы и иерархия ФС: /etc /var /opt /home, cat/less/tail/find | ✅ |
-| 4 | perms | Пользователи и права: rwx, 755, chown, sudo | ⬜ |
+| 4 | perms | Пользователи и права: rwx, 755, chown, sudo | ✅ |
 | 5 | streams | Потоки: stdout/stderr, > >> 2>&1, пайпы | ⬜ |
 | 6 | text | Текст: grep, sed, awk, cut, sort, uniq, wc | ⬜ |
 | 7 | procs | Процессы и сигналы: ps, kill, SIGTERM/SIGKILL, фон, nohup | ⬜ |
