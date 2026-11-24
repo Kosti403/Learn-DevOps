@@ -92,7 +92,7 @@ awk '$9 >= 500' ~/lab/access.log | wc -l
 awk '{print $1}' ~/lab/access.log | sort | uniq -c | sort -rn | head -5
 awk '$9 == 404 {print $7}' ~/lab/access.log | sort | uniq -c | sort -rn | head -5
 awk '{n++} $9>=500{e++} END{printf "%.1f%%\\n", e/n*100}' ~/lab/access.log`)},
- {t:'Докажи себе ловушки: на том же логе сравни <code>grep -c 500</code> и <code>awk \'$9==500\' | wc -l</code>; сравни <code>uniq -c</code> с <code>sort</code> и без; <code>sort -r</code> и <code>sort -rn</code> на выводе uniq -c. Запиши, где и почему разошлось.'},
+ {chk:'<p>grep -c 500 даст число больше, чем awk: он ловит 500 и в размере ответа, и во времени, и в пути. uniq -c без sort покажет одно и то же значение несколькими строками. sort -r поставит «9» выше «100».</p>',t:'Докажи себе ловушки: на том же логе сравни <code>grep -c 500</code> и <code>awk \'$9==500\' | wc -l</code>; сравни <code>uniq -c</code> с <code>sort</code> и без; <code>sort -r</code> и <code>sort -rn</code> на выводе uniq -c. Запиши, где и почему разошлось.'},
  {t:'Безопасная правка конфига: скопируй <code>/etc/ssh/sshd_config</code> (или любой конфиг) в <code>~/lab</code>, выведи его без комментариев и пустых строк, затем через sed поменяй <code>#Port 22</code> на <code>Port 2222</code> — сначала без -i, потом с <code>-i.bak</code>. Проверь <code>diff</code> между файлом и .bak.',sol:C(`cp /etc/ssh/sshd_config ~/lab/sshd_config 2>/dev/null || cp /etc/ssh/ssh_config ~/lab/sshd_config
 grep -v -E "^#|^\\s*$" ~/lab/sshd_config
 sed 's/^#Port 22/Port 2222/' ~/lab/sshd_config | grep Port

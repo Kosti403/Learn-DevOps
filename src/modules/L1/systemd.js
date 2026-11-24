@@ -135,7 +135,7 @@ EOF
 sudo systemctl daemon-reload && sudo systemctl enable --now heartbeat
 journalctl -u heartbeat -f`)},
  {t:'Проверь самовосстановление: убей процесс сервиса через <code>kill -9</code> и посмотри, что сделает systemd. Потом останови штатно <code>systemctl stop</code> — поднимется ли он теперь? Почему разница?',sol:'<p>После kill -9 сервис «упал» (сигнал) → Restart=on-failure поднимет его через 3 с (в журнале видно). systemctl stop — штатная остановка, это не failure → не перезапускается.</p>'},
- {t:'Сломай и почини: поставь в unit <code>ExecStart=beat.sh</code> (без пути), сделай daemon-reload и restart. Прочитай ошибку в status и journalctl, почини.'},
+ {h:'<p>Причину ищи в <code>systemctl status heartbeat</code> и <code>journalctl -u heartbeat -n 20</code> — там будет про путь. Абсолютный путь к скрипту знаешь из прошлой лабы. После правки — <code>daemon-reload</code>.</p>',t:'Сломай и почини: поставь в unit <code>ExecStart=beat.sh</code> (без пути), сделай daemon-reload и restart. Прочитай ошибку в status и journalctl, почини.'},
  {t:'Таймер вместо cron: сделай таймер, который каждые 2 минуты пишет <code>df -h /</code> в журнал. Найди его в <code>list-timers</code> и вывод в <code>journalctl</code>.',sol:C(`sudo tee /etc/systemd/system/diskcheck.service <<'EOF'
 [Service]
 Type=oneshot

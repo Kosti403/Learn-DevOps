@@ -113,7 +113,7 @@ lab:[
 ls /etc/apt/sources.list.d/ && cat /etc/apt/sources.list.d/*.sources
 dpkg -S /usr/bin/ls; dpkg -S "$(which ssh)"
 dpkg -L coreutils | head -30`)},
- {t:'Полный цикл: поставь <code>htop</code> и <code>tree</code>, посмотри <code>apt show</code> и <code>apt policy</code>, удали через remove, проверь, остались ли конфиги, сделай purge и autoremove.'},
+ {chk:'<p>После remove в <code>dpkg -l | grep htop</code> пакет будет в статусе <code>rc</code> (удалён, конфиги остались). После purge строки не будет совсем. autoremove уберёт зависимости, которые ставились только ради удалённого пакета.</p>',t:'Полный цикл: поставь <code>htop</code> и <code>tree</code>, посмотри <code>apt show</code> и <code>apt policy</code>, удали через remove, проверь, остались ли конфиги, сделай purge и autoremove.'},
  {t:'Сторонний репозиторий с ключом: подключи официальный репозиторий Docker по инструкции из теории (своими руками, без копирования одной строкой — разбери каждую часть), поставь <code>docker-ce</code>, проверь <code>apt policy docker-ce</code>, откуда он.',h:'<p>Если не хочешь ставить Docker сейчас — достаточно дойти до apt update и apt policy docker-ce: Candidate должен быть из download.docker.com.</p>'},
  {t:'Обновления: посмотри <code>apt list --upgradable</code>, заморозь один пакет через hold, сделай upgrade и убедись, что он не обновился. Найди своё обновление в <code>/var/log/apt/history.log</code>. Проверь, нужна ли перезагрузка.',sol:C(`apt list --upgradable
 sudo apt-mark hold tree && apt-mark showhold
@@ -121,7 +121,7 @@ sudo apt upgrade -y
 grep -A4 "Start-Date" /var/log/apt/history.log | tail -20
 [ -f /var/run/reboot-required ] && cat /var/run/reboot-required || echo "reboot не нужен"
 sudo apt-mark unhold tree`)},
- {t:'Найди информацию о любой свежей CVE в OpenSSL на ubuntu.com/security и сравни с версией пакета у себя (<code>apt policy openssl</code>): закрыта ли она в твоей версии? Запиши, как ты это определил.'}],
+ {h:'<p>На ubuntu.com/security/cves открой нужную CVE: внизу таблица Package / Release / Status — для noble (24.04) указана версия пакета, в которой уязвимость закрыта. Сравни её со своей <code>apt policy openssl</code> (строка Installed).</p>',t:'Найди информацию о любой свежей CVE в OpenSSL на ubuntu.com/security и сравни с версией пакета у себя (<code>apt policy openssl</code>): закрыта ли она в твоей версии? Запиши, как ты это определил.'}],
 qa:[
  ['Чем apt update отличается от apt upgrade?','update — скачивает свежие списки пакетов из репозиториев. upgrade — обновляет установленные программы до версий из этих списков. full-upgrade ещё и удаляет/добавляет пакеты при изменении зависимостей.'],
  ['Что такое репозиторий и как apt проверяет его подлинность?','Сервер с пакетами и подписанным индексом. apt проверяет подпись ключом GPG (Signed-By/signed-by); подменённый индекс не примется.'],

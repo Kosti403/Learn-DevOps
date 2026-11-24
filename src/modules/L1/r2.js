@@ -52,11 +52,11 @@ LISTEN 0 4096 127.0.0.1:1433 0.0.0.0:* users:(("sqlservr",pid=640))`,lang:'term'
 dotnet test
 if ($?) { Write-Host "tests passed" }
 exit 0`,lang:'ps',o:['dotnet — внешняя программа: проверять $LASTEXITCODE и выходить с ним; exit 0 в конце всё перечёркивает','$? всегда False','Нужен Set-StrictMode','Write-Host ломает код'],a:0,e:'if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }. И не завершать скрипт безусловным exit 0.'},
- {t:'i',ref:'pwsh',q:'Впиши PowerShell-команду: проверить, доступен ли порт 1433 на <code>db-01</code>.',a:['Test-NetConnection db-01 -Port 1433','Test-NetConnection -ComputerName db-01 -Port 1433','tnc db-01 -Port 1433'],ph:'Test-NetConnection …',e:'Аналог nc -zv. Смотреть TcpTestSucceeded.'},
+ {t:'i',ref:'pwsh',q:'Впиши PowerShell-команду: проверить, доступен ли порт 1433 на <code>db-01</code>.',a:['Test-NetConnection db-01 -Port 1433','Test-NetConnection -ComputerName db-01 -Port 1433','tnc db-01 -Port 1433'],ph:'Test-NetConnection …',e:'Test-NetConnection — аналог nc -zv из Linux: пробует открыть TCP-соединение на порт. Смотри строку TcpTestSucceeded: True — порт доступен, False — порт закрыт или пакеты режет firewall.'},
  {t:'r',ref:'res',q:'Диск 100%, место не освобождается после удаления лога. Что делать?',code:`$ sudo lsof +L1 | head -3
 COMMAND  PID  USER   FD  TYPE  SIZE/OFF     NLINK NAME
 node    1950  deploy 12w REG   21474836480  0     /var/log/shop/debug.log (deleted)`,lang:'term',o:['Обнулить через дескриптор (: > /proc/1950/fd/12) или перезапустить shop; на будущее — truncate и ротация логов','Перезагрузить сервер','Удалить ещё раз','Ничего, место освободится само завтра'],a:0,e:'20 ГБ держит процесс. Причина глубже — debug-лог без ротации (logrotate, модуль [[mod:text]]).'},
- {t:'s',ref:'res',q:'Собери рассказ на собесе «сервер тормозит» в правильном порядке.',p:['uptime: load и тренд, сравнить с nproc','top: us / wa / st — какой ресурс','free, df, iostat, ss — подтвердить ресурс','ps/pidstat/iotop — кто','логи, strace, что менялось — почему','лечение причины, а не перезагрузка'],e:'Метод важнее команд.'},
+ {t:'s',ref:'res',q:'Собери рассказ на собесе «сервер тормозит» в правильном порядке.',p:['uptime: load и тренд, сравнить с nproc','top: us / wa / st — какой ресурс','free, df, iostat, ss — подтвердить ресурс','ps/pidstat/iotop — кто','логи, strace, что менялось — почему','лечение причины, а не перезагрузка'],e:'Интервьюер оценивает не список команд, а порядок рассуждения: насколько плохо → какой ресурс → какой процесс → почему. И главное — найти причину, а не перезагрузить сервер и стереть улики.'},
  {t:'r',ref:'procs',q:'Что случилось с контейнером базы?',code:`$ docker inspect mssql --format '{{.State.ExitCode}} {{.State.OOMKilled}}'
 137 true
 $ docker inspect mssql --format '{{.HostConfig.Memory}}'
@@ -78,7 +78,7 @@ www-data`,lang:'term',o:['worker nginx работает от www-data, а у /op
 /etc/nginx/nginx.conf
 /etc/nginx/sites-available/default
 /etc/nginx/sites-enabled/default`,lang:'term',o:['dpkg -L — список файлов пакета: бинарник в /usr/sbin, конфиги в /etc/nginx','find / -name nginx','which nginx','apt show nginx'],a:0,e:'Связь модулей [[mod:files]] и [[mod:pkgs]]: стандарт FHS + база пакетов.'},
- {t:'c',ref:'shell',q:'Скрипт работает, когда ты делаешь <code>bash deploy.sh</code>, но не работает через <code>sh deploy.sh</code> — ошибка на <code>[[</code>. Почему?',o:['sh в Ubuntu — это dash, он не знает [[ ]] — запускать через bash или ./ с шебангом bash','Нужен chmod +x','CRLF-переносы','Нет прав root'],a:0,e:'Синтаксис bash ≠ POSIX sh.'},
+ {t:'c',ref:'shell',q:'Скрипт работает, когда ты делаешь <code>bash deploy.sh</code>, но не работает через <code>sh deploy.sh</code> — ошибка на <code>[[</code>. Почему?',o:['sh в Ubuntu — это dash, он не знает [[ ]] — запускать через bash или ./ с шебангом bash','Нужен chmod +x','CRLF-переносы','Нет прав root'],a:0,e:'В Ubuntu sh — это dash, простая POSIX-оболочка. [[ ]], массивы и {1..10} есть только в bash, поэтому такой скрипт запускают через bash или ./script.sh с шебангом bash.'},
  {t:'r',ref:'linux',q:'Можно ли ставить на этот сервер MS SQL Server 2022 из репозитория Microsoft для Ubuntu?',code:`$ cat /etc/os-release | grep -E "^(NAME|VERSION_ID|ID_LIKE)"
 NAME="Rocky Linux"
 VERSION_ID="9.4"

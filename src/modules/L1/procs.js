@@ -99,7 +99,7 @@ EOF
 chmod +x ~/lab/worker.sh && ~/lab/worker.sh &
 kill %1        # в логе появится saving...
 # повтори с kill -9 — «saving...» не будет: SIGKILL не перехватить`)},
- {t:'Пережить отключение: запусти <code>sleep 600</code> тремя способами (просто, через nohup …&amp;, в tmux), закрой SSH-сессию (или терминал WSL), зайди снова и проверь <code>pgrep -a sleep</code>, какие выжили.'},
+ {chk:'<p>После повторного входа выполни <code>pgrep -a sleep</code>: простой запуск умер (при закрытии сессии пришёл SIGHUP), nohup и tmux выжили. К процессу в tmux можно вернуться: <code>tmux attach</code>.</p>',t:'Пережить отключение: запусти <code>sleep 600</code> тремя способами (просто, через nohup …&amp;, в tmux), закрой SSH-сессию (или терминал WSL), зайди снова и проверь <code>pgrep -a sleep</code>, какие выжили.'},
  {t:'Сделай зомби и убери его: запусти <code>bash -c \'sleep 1 &amp; exec sleep 300\'</code> — через секунду у процесса sleep 300 появится ребёнок-зомби. Найди его в <code>ps</code> (STAT Z), найди родителя и избавься от зомби правильным способом.',sol:C(`bash -c 'sleep 1 & exec sleep 300' &
 sleep 2; ps -o pid,ppid,stat,cmd --ppid $(pgrep -f "sleep 300")
 kill $(pgrep -f "sleep 300")   # убили родителя → зомби усыновлён PID 1 и убран

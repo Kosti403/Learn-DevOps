@@ -79,7 +79,7 @@ lab:[
 ls /etc/hosts /nope 2> err.txt;       cat err.txt
 ls /etc/hosts /nope > all.txt 2>&1;   cat all.txt
 ls /etc/hosts /nope > /dev/null 2>&1; echo $?   # 2 — одна из целей не найдена`)},
- {t:'Докажи порядок перенаправлений: сравни <code>ls /etc/hosts /nope &gt; f 2&gt;&amp;1</code> и <code>ls /etc/hosts /nope 2&gt;&amp;1 &gt; f</code>. Запиши своими словами, почему результат разный.'},
+ {chk:'<p>В первом случае обе строки (вывод и ошибка) окажутся в файле, во втором ошибка останется на экране. Почему: перенаправления выполняются слева направо, и 2&gt;&amp;1 копирует то, куда stdout указывает <b>в этот момент</b>.</p>',t:'Докажи порядок перенаправлений: сравни <code>ls /etc/hosts /nope &gt; f 2&gt;&amp;1</code> и <code>ls /etc/hosts /nope 2&gt;&amp;1 &gt; f</code>. Запиши своими словами, почему результат разный.'},
  {t:'Сломай файл и пойми почему: создай файл с 5 строками в случайном порядке, выполни <code>sort f &gt; f</code>. Потом отсортируй правильно.',sol:C(`printf "c\\na\\ne\\nb\\nd\\n" > f
 sort f > f; cat f          # пусто
 printf "c\\na\\ne\\nb\\nd\\n" > f
