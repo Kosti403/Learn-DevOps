@@ -21,7 +21,7 @@ Node.js CRUD API → голый сервер (systemd, nginx, ssh, ufw) → Dock
 | 4 | perms | Пользователи и права: rwx, 755, chown, sudo | ✅ |
 | 5 | streams | Потоки: stdout/stderr, > >> 2>&1, пайпы | ✅ |
 | 6 | text | Текст: grep, sed, awk, cut, sort, uniq, wc | ✅ |
-| 7 | procs | Процессы и сигналы: ps, kill, SIGTERM/SIGKILL, фон, nohup | ⬜ |
+| 7 | procs | Процессы и сигналы: ps, kill, SIGTERM/SIGKILL, фон, nohup | ✅ |
 | 8 | r1 | **Обзор 1** (1–7) | ✅ (пилот) |
 | 9 | res | «Сервер тормозит»: load average, top, free, vmstat, iostat, df/du → кто → почему (strace, lsof, логи) | ⬜ |
 | 10 | systemd | systemd, unit-файлы, journalctl | ⬜ |
