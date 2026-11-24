@@ -1,4 +1,4 @@
-/* r1 · Обзор 1 — накопительный по пройденным темам Л1 (пилот: linux, shell, files; perms/streams/text/procs добавятся сюда по мере готовности) */
+/* r1 · Обзор 1 — накопительный по модулям 1–7 (linux, shell, files, perms, streams, text, procs) */
 REV({id:'r1',title:'Обзор 1: первые шаги на сервере',
 case:`<p>Ты дежурный. За смену прилетает десяток мелких задач: незнакомый сервер, скрипт не запускается, сайт не открывается, бэкапа нет, в логе что-то странное. Подсказок нет — как на настоящей работе.</p><p class="goal"><b>Цель модуля:</b> проверить, что темы первых модулей работают вместе: соединить в одной задаче дистрибутив, пути, права, потоки и логи.</p>`,
 theory:`<p>Без подсказок. Каждое задание — ситуация, где нужно соединить несколько тем: дистрибутив, оболочку, пути и файлы. Ошибся — перечитай модуль по ссылке ↺.</p>`,
@@ -43,4 +43,19 @@ default  shop`,lang:'term',o:['Ссылка ведёт на несуществу
  {t:'r',ref:'files',q:'Почему <code>tail -f</code> молчит, хотя сайт работает?',code:`$ ls -l /var/log/nginx/
 -rw-r----- 1 www-data adm 52881 Nov 24 09:14 access.log
 -rw-r----- 1 www-data adm 9912044 Nov 24 00:00 access.log.1
-$ tail -f access.log.1`,lang:'term',o:['Следим за старым, ротированным файлом — новые записи идут в access.log','Нет прав','nginx завис','Сломан tail'],a:0,e:'access.log.1 — вчерашний. Нужен tail -F access.log.'}]});
+$ tail -f access.log.1`,lang:'term',o:['Следим за старым, ротированным файлом — новые записи идут в access.log','Нет прав','nginx завис','Сломан tail'],a:0,e:'access.log.1 — вчерашний. Нужен tail -F access.log.'},
+ {t:'r',ref:'perms',q:'Nginx отдаёт 403. Что чинить?',code:`$ namei -l /srv/shop/index.html
+f: /srv/shop/index.html
+drwxr-xr-x root root /
+drwxr-xr-x root root srv
+drwx------ deploy deploy shop
+-rw-r--r-- deploy deploy index.html`,lang:'term',o:['У www-data нет x на /srv/shop — дать chmod 755 /srv/shop (или доступ через группу)','chmod 777 index.html','Перезапустить nginx','Сменить владельца / на www-data'],a:0,e:'Файл читаем всеми, но войти в папку shop может только deploy. Права на файл не помогут без x на каждой папке пути.'},
+ {t:'i',ref:'streams',q:'Впиши строку для cron-задачи: запуск <code>/opt/backup.sh</code> с дописыванием и вывода, и ошибок в <code>/var/log/backup.log</code> (только команду, без расписания).',a:['/opt/backup.sh >> /var/log/backup.log 2>&1','/opt/backup.sh &>> /var/log/backup.log'],ph:'/opt/backup.sh …',e:'>> — не затирать прошлые запуски, 2>&1 — ошибки туда же, иначе «молча не работает».'},
+ {t:'s',ref:'text',q:'Собери: топ-5 адресов, которые чаще всего получают 404.',p:["awk '$9 == 404 {print $7}' /var/log/nginx/access.log",'| sort','| uniq -c','| sort -rn','| head -5'],e:'Отбор по полю кода → поле пути → группировка → подсчёт → по убыванию.'},
+ {t:'r',ref:'procs',q:'Что случилось с сервисом?',code:`$ docker ps -a --format '{{.Names}} {{.Status}}'
+shop-api  Exited (137) 2 minutes ago
+$ dmesg | tail -2
+Out of memory: Killed process 4120 (node) total-vm:2105440kB
+oom_reaper: reaped process 4120 (node)`,lang:'term',o:['Процесс убит OOM killer (SIGKILL → 137): не хватило памяти','Ошибка в коде, приложение упало само','Его остановили docker stop','Образ повреждён'],a:0,e:'137 = 128+9, а dmesg прямо говорит про Out of memory. Смотреть лимиты и утечки памяти.'},
+ {t:'c',ref:'procs',q:'Импорт по SSH идёт уже 20 минут, нужно уехать, ноутбук закрыть. Процесс запущен на переднем плане в обычном терминале. Как спасти, не перезапуская?',o:['Ctrl+Z → bg → disown, затем отключаться','Просто закрыть ноутбук — продолжит','Ctrl+C и запустить в tmux','kill -HUP'],a:0,e:'bg продолжает в фоне, disown отвязывает от оболочки — SIGHUP при выходе его не тронет. На будущее — сразу запускать в tmux.'},
+ {t:'i',ref:'perms',fix:true,q:'Исправь: добавили deploy в группу docker, а он выпал из sudo.',code:'sudo usermod -G docker deploy',a:['sudo usermod -aG docker deploy','usermod -aG docker deploy','sudo usermod -a -G docker deploy'],ph:'sudo usermod …',e:'Без -a список групп заменяется целиком. Вернуть sudo: sudo usermod -aG sudo deploy (из-под другого админа).'}]});
