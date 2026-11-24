@@ -37,7 +37,8 @@ Node.js CRUD API + **MS SQL Server** (Oracle — легаси-тикет 1.5) �
 | 20 | fw | Firewall: ufw, iptables | ⬜ |
 | 21 | nginx | Nginx: reverse proxy, upstream, A/B-слоты, nginx -t | ⬜ |
 | 22 | git | Git для DevOps | ⬜ |
-| 23 | inc1 | **Разбор инцидента 1**: магазин на голом сервере не отвечает (диск, права, сервис, nginx) | ⬜ |
+| 23 | py1 | **Python для DevOps 1**: зачем, когда Python, а когда bash; скрипты, файлы, JSON/YAML, subprocess, argparse, venv и pip, обработка ошибок и коды выхода | ⬜ |
+| 24 | inc1 | **Разбор инцидента 1**: магазин на голом сервере не отвечает (диск, права, сервис, nginx) | ⬜ |
 
 ## Уровень 2 · Контейнеры (Л2) — с модуля 29 лёгкое смешивание, с 33 усложнено
 | id | Тема | Видео |

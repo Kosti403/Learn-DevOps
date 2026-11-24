@@ -2361,10 +2361,10 @@ qa:[
 cheat:[['ip neigh','кэш ARP (MAC соседей)'],['ip r','шлюз и маршруты'],['resolvectl status','DNS-серверы (пришли по DHCP)'],['ipconfig /all','то же в Windows'],['traceroute -n host','путь по L3'],['curl -s -o /dev/null -w "dns=%{time_namelookup} tcp=%{time_connect} tls=%{time_appconnect} ttfb=%{time_starttransfer}" url','время по фазам'],['F12 → Network → Timing','фазы в браузере']]});
 /* Единственный источник порядка. Модуль, которого ещё нет в src/modules, просто пропускается. */
 const LEVELS=[
-  {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','web','ssh','fw','nginx','git','inc1']},
+  {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','web','ssh','fw','nginx','git','py1','inc1']},
   {id:'L2',name:'Контейнеры',ids:['ctr','docker','dfile','multi','r3','vol','dnet','compose','registry','orch','inc2']},
   {id:'L3',name:'Kubernetes',ids:['k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage','helm','incident']},
-  {id:'L4',name:'Доставка и инфраструктура',ids:['gitlabci','runners','vault','tf1','tfstate','tfmod','prom','grafana','bluegreen','sql','inc4']},
+  {id:'L4',name:'Доставка и инфраструктура',ids:['gitlabci','runners','py2','vault','tf1','tfstate','tfmod','prom','grafana','bluegreen','sql','inc4']},
   {id:'L5',name:'Собес',ids:[]}];
 const ORDER=LEVELS.flatMap(l=>l.ids.filter(id=>MODS[id]).map(id=>(MODS[id].lvl=MODS[id].lvl||l.id,id)));
 const PASS=0.6; /* порог открытия следующего модуля */
@@ -2572,6 +2572,7 @@ const LINKS=[
  {g:'CI/CD и раннеры',t:'Habr, МКБ: автоматизация тестирования с SoapUI — практическое руководство',u:'https://habr.com/ru/companies/mkb/articles/852280/',n:'тесты SOAP/REST-сервисов, проверки через запрос в базу (JDBC); про встраивание в CI/CD в статье мало',mod:['gitlabci']},
  {g:'Профессия: Platform Engineering',t:'Habr, VK: Who are you, Platform Engineering. Часть 1',u:'https://habr.com/ru/companies/vk/articles/792368/',n:'что такое Platform Engineering и внутренняя платформа разработки (IDP), какие проблемы решает — куда растёт DevOps',mod:[]},
  {g:'Профессия: Platform Engineering',t:'Habr, VK: Platform Engineering. Часть 2 — типовая архитектура IDP',u:'https://habr.com/ru/companies/vk/articles/809447/',n:'из чего состоит платформа: портал, Git, CI/CD, артефакты, деплой инфраструктуры, AppSec; сравнение Azure DevOps и GitLab',mod:['gitlabci','runners']},
+ {g:'Python',t:'Видео по Python (из заметок в Notion)',u:'https://www.youtube.com/watch?v=wDmPgXhlDIg',n:'тема не проверялась',mod:['py1']},
  {g:'Контейнеры и Kubernetes',t:'Видео: Kubernetes с нуля (по нему идут уровни 2–3)',u:'https://www.youtube.com/watch?v=6mhlHDJOQAw',n:'тайм-коды разложены по модулям в ROADMAP',mod:['ctr','docker','dfile','multi','dnet','compose','orch','k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage']},
  {g:'CI/CD и раннеры',t:'Настройка CI/CD для GitLab-репозитория: схемы и гайд по шагам',u:'https://lred.ru/webmasteru/36074-nastrojka-cicd-dlya-gitlab-repozitoriya-skhemy-i-gajd-po-shagam',n:'в заметках — «GitLab CI/CD — настройка пошагово»',mod:['gitlabci']},
  {g:'CI/CD и раннеры',t:'Reddit r/devops: как подключиться к VPN внутри пайплайна',u:'https://www.reddit.com/r/devops/comments/u2enye/how_to_connect_to_vpn_inside_pipeline/',n:'когда сервер для деплоя доступен только через VPN',mod:['runners','gitlabci']},
