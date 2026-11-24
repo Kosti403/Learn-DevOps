@@ -7,7 +7,8 @@ const $=s=>document.querySelector(s);
 const score=id=>{const m=MODS[id],d=P.done[id]||{};const n=m.ex.length;const ok=Object.values(d).filter(v=>v===1).length;return {n,ok,pct:n?ok/n:0}};
 const unlocked=id=>{const i=ORDER.indexOf(id);if(i<=0||P.open[id])return true;const prev=ORDER[i-1];return score(prev).pct>=PASS&&unlocked(prev)};
 const groupOf=x=>x.ref?'mix':x.g||'base';
-const plain=s=>String(s).replace(/<[^>]+>/g,'');
+const linkRefs=h=>String(h).replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?`<a class="mref" href="#m-${id}" title="${esc(MODS[id].title)}">${ORDER.indexOf(id)+1}</a>`:'«'+id+'» (в работе)');
+const plain=s=>String(s).replace(/<[^>]+>/g,'').replace(/\[\[mod:(\w+)\]\]/g,(_,id)=>MODS[id]?String(ORDER.indexOf(id)+1):id);
 
 function side(cur){
   $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
@@ -39,7 +40,7 @@ function modView(id,tab){
     h+=`<div class="bar"><span>Верно: ${s.ok} из ${s.n} (${s.pct*100|0}%)</span><button class="reset" data-id="${id}">Сбросить</button></div>`;
     m.ex.forEach((x,k)=>{const g=m.review?'rev':groupOf(x);if(g!==last){h+=`<h3 class="grp">${GROUPS[g]}</h3>`;last=g}h+=exHTML(x,k,d[k])});
     if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#m-${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
-  if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. <b>Где делать:</b> бесплатно — GitHub Codespaces (Linux + Docker в браузере, ~60 ч/мес) или Killercoda (песочницы Linux/Kubernetes); для Спринта 0 проекта — свой VPS на 1–2 ГБ (Hoster.kz, PS.kz — ~3 100 ₸/мес, оплата Kaspi; Hetzner CX23 — €5.99/мес, почасовая). WSL/VirtualBox — только если на компьютере включена виртуализация. Не на рабочем сервере.</p>','warn')+
+  if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. <b>Где делать:</b> бесплатно — GitHub Codespaces (Linux + Docker в браузере, ~60 ч/мес) или Killercoda (песочницы Linux/Kubernetes); для Спринта 0 проекта — свой VPS на 1–2 ГБ (Hoster.kz, PS.kz — ~3 100 ₸/мес, оплата Kaspi; Hetzner CX23 — €5.99/мес, почасовая). WSL/VirtualBox — только если на компьютере включена виртуализация. Не на рабочем сервере. Один раз поставь утилиты, которые нужны лабам курса: <code>sudo apt update && sudo apt install -y bind9-dnsutils traceroute mtr-tiny sysstat iotop stress-ng shellcheck tree netcat-openbsd</code>.</p>','warn')+
     m.lab.map((l,k)=>{const dn=(P.lab[id]||{})[k];return `<div class="lab${dn?' ok':''}"><div class="exh"><span class="tag">Лаба ${k+1}</span><label><input type="checkbox" class="labdone" data-id="${id}" data-k="${k}"${dn?' checked':''}> сделал сам</label></div><div class="q">${l.t}</div>${l.h?`<details><summary>Подсказка</summary>${l.h}</details>`:''}${l.chk?`<details><summary>Как проверить себя</summary>${l.chk}</details>`:''}${l.sol?`<details class="sol"><summary>Решение (только после попытки)</summary>${l.sol}</details>`:''}</div>`}).join('');
   if(tab==='lab')h+=projBox;
   if(tab==='qa')h+=`<p class="muted">Сначала ответь вслух сам, потом раскрой.</p>`+m.qa.map(([q,a])=>`<details class="qa"><summary>${q}</summary><div>${a}</div></details>`).join('');
@@ -59,7 +60,7 @@ function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сю�
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home();
+  $('#main').innerHTML=linkRefs(a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home());
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 
@@ -81,7 +82,7 @@ document.addEventListener('click',ev=>{
   if(cl('opt')||cl('go')){
     const ok=!!exCheck(x,el);(P.done[id]=P.done[id]||{})[k]=ok?1:0;save();
     el.classList.toggle('ok',ok);el.classList.toggle('no',!ok);
-    el.querySelector('.fb').innerHTML=`<div class="res">${ok?'✓ Верно':'✗ Неверно'}</div>${ok?'':`<div class="right">Правильно: ${exRight(x)}</div>`}<div class="why">${x.e}</div><button class="totodo" data-t="${esc((MODS[id].title+': '+plain(x.q)).slice(0,140))}">В разобрать</button>`;
+    el.querySelector('.fb').innerHTML=linkRefs(`<div class="res">${ok?'✓ Верно':'✗ Неверно'}</div>${ok?'':`<div class="right">Правильно: ${exRight(x)}</div>`}<div class="why">${x.e}</div><button class="totodo" data-t="${esc((MODS[id].title+': '+plain(x.q)).slice(0,140))}">В разобрать</button>`);
     const s=score(id),b=$('.bar span');if(b)b.textContent=`Верно: ${s.ok} из ${s.n} (${s.pct*100|0}%)`;side(id)}});
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.classList.contains('inp')){const g=ev.target.parentNode.querySelector('.go');g&&g.click()}});
 document.addEventListener('input',ev=>{if(ev.target.id==='cs'){const v=ev.target.value.toLowerCase();document.querySelectorAll('.cs tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(v)?'':'none')}});

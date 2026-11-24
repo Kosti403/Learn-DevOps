@@ -15,7 +15,7 @@ echo "[$(date +%F_%T)] start" >> "$LOG"`)}
 ${tbl(['Флаг','Что делает','От чего спасает'],[
  ['<code>-e</code>','выйти, если любая команда вернула ненулевой код','упал <code>cd</code> — не выполнять <code>rm</code> дальше'],
  ['<code>-u</code>','ошибка при обращении к неустановленной переменной','опечатка <code>$RELESE_DIR</code> → пустота → <code>rm -rf /*</code>'],
- ['<code>-o pipefail</code>','пайп падает, если упала любая его часть (модуль 5)','<code>curl … | tar x</code> «успешен», хотя curl не скачал']])}
+ ['<code>-o pipefail</code>','пайп падает, если упала любая его часть (модуль [[mod:streams]])','<code>curl … | tar x</code> «успешен», хотя curl не скачал']])}
 <h2>Переменные</h2>
 ${C(`name="shop"                 # БЕЗ пробелов вокруг =
 port=3000
@@ -23,7 +23,7 @@ echo "$name on port $port"
 today=$(date +%F)          # вывод команды в переменную
 count=$(( port + 1 ))      # арифметика — только $(( ))
 readonly BACKUP_DIR=/backup   # константа
-export DB_HOST=localhost   # видна дочерним процессам (модуль 2: source vs ./)`)}
+export DB_HOST=localhost   # видна дочерним процессам (модуль [[mod:shell]]: source vs ./)`)}
 <p><code>name = "shop"</code> с пробелами bash поймёт как «запусти команду <code>name</code> с аргументами <code>=</code> и <code>shop</code>» — <i>command not found</i>.</p>
 <h2>Кавычки — главный источник багов</h2>
 ${tbl(['Запись','Что происходит','Пример: file="my report.txt"'],[
@@ -116,7 +116,7 @@ echo "end"`,lang:'sh',o:['start, затем ошибка «HOSTNAM: unbound vari
  {t:'c',g:'job',q:'Коллега прислал скрипт для прода. Что сделать до запуска?',o:['Прочитать, прогнать shellcheck и bash -n, проверить на тестовом окружении','Сразу запустить под root','Запустить с bash -x на проде','Ничего, раз коллега проверил'],a:0,e:'Чужой скрипт на проде — как чужая команда rm. Минимум — прочитать и прогнать линтер.'},
  {t:'c',g:'job',q:'В CI-шаге скрипт падает на <code>set -u</code> из-за <code>$CI_COMMIT_TAG</code>, которой нет в обычных пушах. Как правильно?',o:['Использовать "${CI_COMMIT_TAG:-}" (пусто по умолчанию) и проверять -n','Убрать set -u из всех скриптов','Задать тег вручную','Игнорировать'],a:0,e:'${VAR:-} явно говорит «может быть пустой» и не ломает строгий режим.'}],
 lab:[
- {t:'Напиши <code>~/lab/check.sh</code>: строгий режим; печатает имя хоста, дату, load average, свободное место на / и сколько памяти available. Прогони через shellcheck.',h:'<p>uptime, df -h /, free -h — модуль 9. Чтобы вытащить одно число: <code>df -h / | awk \'NR==2 {print $4}\'</code>.</p>',sol:C(`#!/usr/bin/env bash
+ {t:'Напиши <code>~/lab/check.sh</code>: строгий режим; печатает имя хоста, дату, load average, свободное место на / и сколько памяти available. Прогони через shellcheck.',h:'<p>uptime, df -h /, free -h — модуль [[mod:res]]. Чтобы вытащить одно число: <code>df -h / | awk \'NR==2 {print $4}\'</code>.</p>',sol:C(`#!/usr/bin/env bash
 set -euo pipefail
 echo "host:  $(hostname)"
 echo "date:  $(date '+%F %T')"

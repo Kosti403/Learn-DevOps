@@ -19,5 +19,6 @@ ORDER.forEach((id,i)=>{const m=MODS[id];
     if(x.t==='i'&&!(Array.isArray(x.a)&&x.a.length))bad(id,k,'нет ответов');
     if(x.t==='s'&&!(x.p&&x.p.length>1))bad(id,k,'нет шагов');
     if(x.ref&&!(ORDER.indexOf(x.ref)>-1&&ORDER.indexOf(x.ref)<i))bad(id,k,'ref не назад: '+x.ref)})});
+ORDER.forEach(id=>{for(const m of JSON.stringify(MODS[id]).matchAll(/\[\[mod:(\w+)\]\]/g))if(!ctx.LEVELS.flatMap(l=>l.ids).includes(m[1]))bad(id,-1,'ссылка на модуль вне плана: '+m[1])});
 const plan=ctx.LEVELS.flatMap(l=>l.ids);ctx.TICKETS.forEach(t=>t.need.forEach(n=>{if(!plan.includes(n))bad('project',-1,'тикет '+t.id+': модуля '+n+' нет в плане')}));
 console.log(err?`Ошибок: ${err}`:'✓ ошибок нет',info);process.exit(err?1:0);

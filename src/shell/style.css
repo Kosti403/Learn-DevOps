@@ -89,3 +89,4 @@ button:hover{border-color:var(--mu)}
 .ticket{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--mix);border-radius:10px;padding:10px 16px;margin:12px 0}.ticket.ok{opacity:.7;border-left-color:var(--ok)}.ticket h3{margin:.2em 0 .5em}.ticket .tag{color:var(--mix)}
 .rdy{color:var(--ok)}.nrdy{color:var(--mu)}
 .projbox{background:var(--pn);border:1px dashed var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:20px}.projbox h2{color:var(--mix)}
+.mref{font-weight:700;text-decoration:none;border-bottom:1px dashed var(--c)}

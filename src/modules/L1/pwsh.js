@@ -133,7 +133,7 @@ Get-ExecutionPolicy -List`,'ps')},
  {t:'Разведка без гугла: найди командлет, который показывает IP-адреса сетевых интерфейсов, и командлет, который показывает свободное место на дисках. Используй только Get-Command, Get-Help и Get-Member.',h:'<p>Существительные: NetIPAddress, Volume.</p>',sol:C(`Get-Command *ipaddress*
 Get-NetIPAddress -AddressFamily IPv4 | Select-Object InterfaceAlias, IPAddress
 Get-Volume | Select-Object DriveLetter, @{n='FreeGB';e={[math]::Round($_.SizeRemaining/1GB,1)}}`,'ps')},
- {t:'Перепиши на PowerShell однострочники из модулей 6 и 9: топ-5 процессов по CPU; сколько файлов .log в папке и их общий размер в МБ; строки с «error» в файле с номерами.',sol:C(`Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Name, Id, CPU
+ {t:'Перепиши на PowerShell однострочники из модулей [[mod:text]] и [[mod:res]]: топ-5 процессов по CPU; сколько файлов .log в папке и их общий размер в МБ; строки с «error» в файле с номерами.',sol:C(`Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Name, Id, CPU
 Get-ChildItem C:\\Windows\\Logs -Recurse -Filter *.log -ErrorAction SilentlyContinue |
   Measure-Object Length -Sum | ForEach-Object { "{0} файлов, {1:N1} МБ" -f $_.Count, ($_.Sum/1MB) }
 Select-String -Path .\\app.log -Pattern error | Select-Object LineNumber, Line`,'ps')},

@@ -1,4 +1,4 @@
-/* r2 · Обзор 2 — накопительный по модулям 1–15: половина по свежим 9–15 (res, systemd, pkgs, bash1, bash2, pwsh, net1), половина по 1–8 */
+/* r2 · Обзор 2 — накопительный по модулям [[mod:linux]]–15: половина по свежим 9–15 (res, systemd, pkgs, bash1, bash2, pwsh, net1), половина по 1–8 */
 REV({id:'r2',title:'Обзор 2: дежурство на сервере',
 case:`<p>Ты на дежурстве неделю. За это время: сайт тормозит, сервис не поднимается после перезагрузки, бэкап молча не делается, приложение не видит базу, обновление пакетов чуть не уронило прод, а скрипт коллеги удалил не то. Подсказок нет — только вывод команд, как в реальном чате инцидента.</p><p class="goal"><b>Цель обзора:</b> соединять темы: по выводу нескольких команд найти причину, выбрать безопасное действие и объяснить его. Это ближе всего к вопросам на собеседовании и к реальной работе.</p>`,
 theory:`<p>Обзор на 20% сложнее модулей: в каждом задании 2–3 темы, длинный вывод, нет подсказок. Ошибся — открой модуль по ссылке ↺ и перечитай ловушки.</p>`,
@@ -21,7 +21,7 @@ $ vmstat 1 2 | tail -1
  {t:'r',ref:'systemd',q:'Что не так?',code:`$ journalctl -u shop -n 3 --no-pager
 Nov 26 09:00:01 web-01 systemd[1]: Started shop.service - Shop API.
 Nov 26 09:00:01 web-01 node[2201]: Error: ENOENT: no such file or directory, open 'config.json'
-Nov 26 09:00:01 web-01 systemd[1]: shop.service: Main process exited, code=exited, status=1/FAILURE`,lang:'term',o:['Относительный путь: у сервиса другая рабочая папка — нужен WorkingDirectory=/opt/shop или абсолютный путь','Нет прав root','config.json повреждён','Нужен restart'],a:0,e:'«В терминале работает, как сервис — нет» — окружение сервиса другое (модуль 10).'},
+Nov 26 09:00:01 web-01 systemd[1]: shop.service: Main process exited, code=exited, status=1/FAILURE`,lang:'term',o:['Относительный путь: у сервиса другая рабочая папка — нужен WorkingDirectory=/opt/shop или абсолютный путь','Нет прав root','config.json повреждён','Нужен restart'],a:0,e:'«В терминале работает, как сервис — нет» — окружение сервиса другое (модуль [[mod:systemd]]).'},
  {t:'i',ref:'systemd',fix:true,q:'Исправь последовательность после правки unit-файла — изменения не применяются.',code:'sudo systemctl restart shop',a:['sudo systemctl daemon-reload && sudo systemctl restart shop','sudo systemctl daemon-reload; sudo systemctl restart shop','systemctl daemon-reload && systemctl restart shop'],ph:'sudo systemctl …',e:'Без daemon-reload systemd использует старую версию юнита из памяти.'},
  {t:'r',ref:'bash2',q:'Почему бэкап не делается уже неделю?',code:`$ sudo crontab -l
 0 3 * * * pg_dump shop > /backup/shop-$(date +%F).sql
@@ -55,7 +55,7 @@ exit 0`,lang:'ps',o:['dotnet — внешняя программа: провер
  {t:'i',ref:'pwsh',q:'Впиши PowerShell-команду: проверить, доступен ли порт 1433 на <code>db-01</code>.',a:['Test-NetConnection db-01 -Port 1433','Test-NetConnection -ComputerName db-01 -Port 1433','tnc db-01 -Port 1433'],ph:'Test-NetConnection …',e:'Аналог nc -zv. Смотреть TcpTestSucceeded.'},
  {t:'r',ref:'res',q:'Диск 100%, место не освобождается после удаления лога. Что делать?',code:`$ sudo lsof +L1 | head -3
 COMMAND  PID  USER   FD  TYPE  SIZE/OFF     NLINK NAME
-node    1950  deploy 12w REG   21474836480  0     /var/log/shop/debug.log (deleted)`,lang:'term',o:['Обнулить через дескриптор (: > /proc/1950/fd/12) или перезапустить shop; на будущее — truncate и ротация логов','Перезагрузить сервер','Удалить ещё раз','Ничего, место освободится само завтра'],a:0,e:'20 ГБ держит процесс. Причина глубже — debug-лог без ротации (logrotate, модуль 6).'},
+node    1950  deploy 12w REG   21474836480  0     /var/log/shop/debug.log (deleted)`,lang:'term',o:['Обнулить через дескриптор (: > /proc/1950/fd/12) или перезапустить shop; на будущее — truncate и ротация логов','Перезагрузить сервер','Удалить ещё раз','Ничего, место освободится само завтра'],a:0,e:'20 ГБ держит процесс. Причина глубже — debug-лог без ротации (logrotate, модуль [[mod:text]]).'},
  {t:'s',ref:'res',q:'Собери рассказ на собесе «сервер тормозит» в правильном порядке.',p:['uptime: load и тренд, сравнить с nproc','top: us / wa / st — какой ресурс','free, df, iostat, ss — подтвердить ресурс','ps/pidstat/iotop — кто','логи, strace, что менялось — почему','лечение причины, а не перезагрузка'],e:'Метод важнее команд.'},
  {t:'r',ref:'procs',q:'Что случилось с контейнером базы?',code:`$ docker inspect mssql --format '{{.State.ExitCode}} {{.State.OOMKilled}}'
 137 true
@@ -77,7 +77,7 @@ www-data`,lang:'term',o:['worker nginx работает от www-data, а у /op
 /usr/sbin/nginx
 /etc/nginx/nginx.conf
 /etc/nginx/sites-available/default
-/etc/nginx/sites-enabled/default`,lang:'term',o:['dpkg -L — список файлов пакета: бинарник в /usr/sbin, конфиги в /etc/nginx','find / -name nginx','which nginx','apt show nginx'],a:0,e:'Связь модулей 3 и 11: стандарт FHS + база пакетов.'},
+/etc/nginx/sites-enabled/default`,lang:'term',o:['dpkg -L — список файлов пакета: бинарник в /usr/sbin, конфиги в /etc/nginx','find / -name nginx','which nginx','apt show nginx'],a:0,e:'Связь модулей [[mod:files]] и [[mod:pkgs]]: стандарт FHS + база пакетов.'},
  {t:'c',ref:'shell',q:'Скрипт работает, когда ты делаешь <code>bash deploy.sh</code>, но не работает через <code>sh deploy.sh</code> — ошибка на <code>[[</code>. Почему?',o:['sh в Ubuntu — это dash, он не знает [[ ]] — запускать через bash или ./ с шебангом bash','Нужен chmod +x','CRLF-переносы','Нет прав root'],a:0,e:'Синтаксис bash ≠ POSIX sh.'},
  {t:'r',ref:'linux',q:'Можно ли ставить на этот сервер MS SQL Server 2022 из репозитория Microsoft для Ubuntu?',code:`$ cat /etc/os-release | grep -E "^(NAME|VERSION_ID|ID_LIKE)"
 NAME="Rocky Linux"
@@ -86,4 +86,4 @@ ID_LIKE="rhel centos fedora"
 $ uname -m
 x86_64`,lang:'term',o:['Нет — это семейство RHEL: нужен репозиторий Microsoft для RHEL и dnf, а не пакеты для Ubuntu и apt','Да, apt есть везде','Нет — архитектура не подходит','Да, если добавить ID_LIKE=debian'],a:0,e:'Сначала «кто ты», потом установка. x86_64 — подходит, семейство — другое.'},
  {t:'c',ref:'net1',q:'С ноутбука нужно подключиться SSMS к MS SQL на сервере, где порт 1433 закрыт снаружи. Самый безопасный путь?',o:['ssh -L 1433:localhost:1433 deploy@db-01 и SSMS к localhost,1433','Открыть 1433 в интернет','Отключить ufw на время','Поставить SSMS на сервер'],a:0,e:'Порт базы закрыт, трафик зашифрован внутри SSH.'},
- {t:'c',ref:'res',q:'Каждую ночь в 3:00–3:40 растёт wa и тормозит сайт. В cron в 3:00 — бэкап базы. Лучшее решение?',o:['Запускать бэкап с nice/ionice, в окно минимальной нагрузки, по возможности — с реплики; проверить, что бэкапы не копятся на том же диске','Отключить бэкапы','Перенести сайт на другой сервер','Перезагружать сервер в 3:40'],a:0,e:'Связь модулей 9, 13 и 7: нагрузка по расписанию, приоритеты процессов.'}]});
+ {t:'c',ref:'res',q:'Каждую ночь в 3:00–3:40 растёт wa и тормозит сайт. В cron в 3:00 — бэкап базы. Лучшее решение?',o:['Запускать бэкап с nice/ionice, в окно минимальной нагрузки, по возможности — с реплики; проверить, что бэкапы не копятся на том же диске','Отключить бэкапы','Перенести сайт на другой сервер','Перезагружать сервер в 3:40'],a:0,e:'Связь модулей [[mod:res]], [[mod:bash2]] и [[mod:procs]]: нагрузка по расписанию, приоритеты процессов.'}]});
