@@ -6,6 +6,12 @@
 
 Статус: ✅ готов · 🛠 в работе · ⬜ не начат
 
+## Сквозной проект «Магазин» (`src/course/project.js`, экран #project)
+Node.js CRUD API → голый сервер (systemd, nginx, ssh, ufw) → Docker/Compose → Kubernetes → Helm → GitLab CI/CD (+Vault) → Prometheus/Grafana → Terraform → README, инцидент, рассказ, резюме. 8 спринтов, 37 тикетов, у каждого: зачем · что сделать · готово, когда · какие модули готовят.
+- **С модуля 7** блок «Ситуация» в модулях строится вокруг магазина (что сломалось/что нужно в проекте), а не абстрактной истории.
+- После модуля, который закрывает подготовку тикета, в модуле появляется блок «🛠 В проекте» (сам, по `need`).
+- **Разбор инцидента** в конце каждого уровня (inc1, inc2, incident, inc4): длинная задача без вариантов — дан вывод нескольких команд, найти причину самому, записать «симптом → диагностика → причина → исправление».
+
 ## Уровень 1 · Linux-база (Л1) — только своя тема
 | № | id | Тема | Статус |
 |---|---|---|---|
@@ -30,6 +36,7 @@
 | 19 | fw | Firewall: ufw, iptables | ⬜ |
 | 20 | nginx | Nginx: reverse proxy, upstream, A/B-слоты, nginx -t | ⬜ |
 | 21 | git | Git для DevOps | ⬜ |
+| 22 | inc1 | **Разбор инцидента 1**: магазин на голом сервере не отвечает (диск, права, сервис, nginx) | ⬜ |
 
 ## Уровень 2 · Контейнеры (Л2) — с модуля 29 лёгкое смешивание, с 33 усложнено
 | id | Тема | Видео |
@@ -44,12 +51,13 @@
 | compose | Docker Compose, DNS 127.0.0.11, healthcheck, depends_on | 1:30:25 |
 | registry | Registry, теги, save/load | |
 | orch | Compose / Swarm / Kubernetes — когда что | 7:42, 13:40 |
+| inc2 | **Разбор инцидента 2**: контейнеры магазина (не видят базу, кончилось место, OOM) | |
 
 ## Уровень 3 · Kubernetes (Л3)
 k8sarch (control plane/worker, 1:55) · k8scomp (api-server, etcd, scheduler, controller-manager, 1:59) · raft (кворум, 2:22) · kubectl (kubeconfig, контекст, RBAC, 2:17) · pod (sidecar, сеть пода, CNI, 2:33–2:58) · deploy (rolling update, drain, PDB, 2:58–3:15) · sts (StatefulSet, DaemonSet, 3:15) · probes (3:23) · qos (requests/limits, 3:28) · svc (Service, kube-proxy, DNS, 3:33) · ingress (4:02) · cfg (ConfigMap/Secret, base64 ≠ шифрование, 4:12–4:37) · jobs (Job/CronJob/CRD/Namespace, 4:41) · storage (PV/PVC/StorageClass, 4:46) · helm · incident (разбор поломки: selector 4:08, Pending, CrashLoop)
 
 ## Уровень 4 · Доставка и инфраструктура (Л4) — около половины смешанных
-gitlabci · runners · vault · tf1 (IaC, provider, plan/apply) · tfstate (state, remote backend, S3: versioning, запрет удаления, откат версии, lock) · tfmod (variables, workspaces, modules, Terragrunt) · prom (Prometheus, метрики) · grafana (RPS, p95, error rate, алерты) · bluegreen (деплой-стратегии) · sql (быстрое повторение)
+gitlabci · runners · vault · tf1 (IaC, provider, plan/apply) · tfstate (state, remote backend, S3: versioning, запрет удаления, откат версии, lock) · tfmod (variables, workspaces, modules, Terragrunt) · prom (Prometheus, метрики) · grafana (RPS, p95, error rate, алерты) · bluegreen (деплой-стратегии) · sql (быстрое повторение) · **inc4** (разбор инцидента: пайплайн, state, алерты)
 
 ## Уровень 5 · Собес
 Сценарии «прод упал», вопросы по всем темам, разбор «почему».

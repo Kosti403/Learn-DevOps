@@ -85,3 +85,7 @@ button:hover{border-color:var(--mu)}
 .term dl{margin:8px 0 0}.term dt{color:var(--ac);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-top:10px}.term dd{margin:2px 0 0}
 .case{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:14px}.case h2{color:var(--mix)}
 .goal{background:var(--pn2);border-radius:6px;padding:8px 12px}
+
+.ticket{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--mix);border-radius:10px;padding:10px 16px;margin:12px 0}.ticket.ok{opacity:.7;border-left-color:var(--ok)}.ticket h3{margin:.2em 0 .5em}.ticket .tag{color:var(--mix)}
+.rdy{color:var(--ok)}.nrdy{color:var(--mu)}
+.projbox{background:var(--pn);border:1px dashed var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:20px}.projbox h2{color:var(--mix)}

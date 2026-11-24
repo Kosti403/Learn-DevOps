@@ -84,7 +84,11 @@ button:hover{border-color:var(--mu)}
 .term{background:var(--pn2);border-radius:8px;padding:8px 12px;margin:8px 0}.term>summary{font-weight:700;cursor:pointer}
 .term dl{margin:8px 0 0}.term dt{color:var(--ac);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-top:10px}.term dd{margin:2px 0 0}
 .case{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:14px}.case h2{color:var(--mix)}
-.goal{background:var(--pn2);border-radius:6px;padding:8px 12px}</style></head><body><button id="burger" aria-label="Меню">☰ Модули</button>
+.goal{background:var(--pn2);border-radius:6px;padding:8px 12px}
+
+.ticket{background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--mix);border-radius:10px;padding:10px 16px;margin:12px 0}.ticket.ok{opacity:.7;border-left-color:var(--ok)}.ticket h3{margin:.2em 0 .5em}.ticket .tag{color:var(--mix)}
+.rdy{color:var(--ok)}.nrdy{color:var(--mu)}
+.projbox{background:var(--pn);border:1px dashed var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:20px}.projbox h2{color:var(--mix)}</style></head><body><button id="burger" aria-label="Меню">☰ Модули</button>
 <nav id="side"></nav>
 <main id="main"></main><script>/* Помощники для текста модулей. Всё глобально (один файл после сборки).
    esc(s)             — экранировать HTML
@@ -840,10 +844,10 @@ qa:[
 cheat:[["awk '{print $1}' log | sort | uniq -c | sort -rn | head",'топ значений поля'],['grep -v x','всё, кроме x'],['grep -c x','сколько строк с x'],['grep -A 5 -B 2 x','контекст вокруг'],['grep -E "a|b"','несколько вариантов'],['grep -r x /etc/nginx/','рекурсивно'],['zgrep x log.gz','в сжатом логе'],['cut -d: -f1 /etc/passwd','поле по разделителю'],['sort -rn','числа по убыванию'],['sort -h','1K/2M/3G'],["awk '$9 >= 500' access.log",'условие на столбец'],["awk -F: '{print $1}'",'другой разделитель'],["sed -i.bak 's/a/b/g' f",'замена в файле с бэкапом'],["sed -n '10,20p' f",'строки 10–20'],['wc -l','число строк']]});
 /* Единственный источник порядка. Модуль, которого ещё нет в src/modules, просто пропускается. */
 const LEVELS=[
-  {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','ssh','fw','nginx','git']},
-  {id:'L2',name:'Контейнеры',ids:['ctr','docker','dfile','multi','r3','vol','dnet','compose','registry','orch']},
+  {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','ssh','fw','nginx','git','inc1']},
+  {id:'L2',name:'Контейнеры',ids:['ctr','docker','dfile','multi','r3','vol','dnet','compose','registry','orch','inc2']},
   {id:'L3',name:'Kubernetes',ids:['k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage','helm','incident']},
-  {id:'L4',name:'Доставка и инфраструктура',ids:['gitlabci','runners','vault','tf1','tfstate','tfmod','prom','grafana','bluegreen','sql']},
+  {id:'L4',name:'Доставка и инфраструктура',ids:['gitlabci','runners','vault','tf1','tfstate','tfmod','prom','grafana','bluegreen','sql','inc4']},
   {id:'L5',name:'Собес',ids:[]}];
 const ORDER=LEVELS.flatMap(l=>l.ids.filter(id=>MODS[id]).map(id=>(MODS[id].lvl=MODS[id].lvl||l.id,id)));
 const PASS=0.6; /* порог открытия следующего модуля */
@@ -965,6 +969,61 @@ function earlyTerms(id){const m=MODS[id],plan=PLAN(),i=plan.indexOf(id);
 const termHTML=(t,open)=>`<details class="term"${open?' open':''}><summary>${t.n}</summary><dl>
 <dt>Что это</dt><dd>${t.what}</dd><dt>Зачем это вообще нужно</dt><dd>${t.why}</dd><dt>Где живёт</dt><dd>${t.where}</dd><dt>Когда ты с этим столкнёшься</dt><dd>${t.when}</dd></dl>
 <p class="muted">${MODS[t.m]?`Подробно: <a href="#m-${t.m}">${MODS[t.m].title}</a>`:'Подробно — в своём модуле (ещё в работе)'}</p></details>`;
+/* Сквозной проект «Магазин» — от голого сервера до Kubernetes + CI/CD + мониторинг + Terraform.
+   Итог: Node.js CRUD API (товары) в Kubernetes через Helm, CI/CD в GitLab, Prometheus/Grafana, инфраструктура в Terraform. Публичный репо с README и схемой.
+   Каждый тикет: id · t (название) · why (зачем — какая боль в проекте) · do (что сделать) · done (как проверить, что готово) · need (модули, которые к нему готовят) · hint (подсказка, раскрывается).
+   Модули из need показывают у себя блок «В проекте»: какой тикет теперь можно делать. */
+const PROJECT={
+ goal:'Простое Node.js CRUD API «Магазин» (товары), задеплоенное в Kubernetes через Helm, с CI/CD в GitLab CI, мониторингом Prometheus/Grafana и инфраструктурой в Terraform. Всё в публичном GitLab-репозитории с README и схемой архитектуры — это твоё портфолио на собес.',
+ sprints:[
+ {id:'s0',n:'Спринт 0 · Голый сервер',goal:'Поднять API на обычном Linux-сервере руками — без Docker. Так ты поймёшь, из чего состоит прод и какие боли потом решают контейнеры.',tickets:[
+  {id:'0.1',t:'Поднять сервер',need:['linux','shell'],why:'Нужна машина, на которой будет жить магазин. На работе это VPS в облаке, для учёбы хватит VM или WSL.',do:'VM в VirtualBox с Ubuntu Server 24.04 LTS или дешёвый VPS (Hetzner, Selectel, Timeweb). Узнай дистрибутив, ядро, архитектуру.',done:'<code>cat /etc/os-release</code> показывает Ubuntu 24.04 LTS, <code>uname -m</code> — архитектуру.'},
+  {id:'0.2',t:'Пользователь deploy и права',need:['perms'],why:'Работать под root опасно: одна опечатка — и сервер сломан. Сервисы и деплой живут под отдельным пользователем с минимумом прав.',do:'Создать пользователя <code>deploy</code> с sudo, папку <code>/opt/shop</code> с владельцем deploy.',done:'<code>id deploy</code> показывает группу sudo, <code>ls -ld /opt/shop</code> — владелец deploy.'},
+  {id:'0.3',t:'SSH по ключу, пароль выключен',need:['ssh'],why:'Боты круглосуточно подбирают пароли ко всем серверам в интернете. Вход только по ключу закрывает эту дверь.',do:'Сгенерировать ed25519-ключ, положить публичный в <code>authorized_keys</code> deploy, в <code>sshd_config</code> выключить PasswordAuthentication и вход root.',done:'<code>ssh deploy@сервер</code> пускает без пароля; <code>ssh -o PubkeyAuthentication=no deploy@сервер</code> — отказ.',hint:'<p>Перед перезапуском sshd держи вторую открытую сессию — если ошибся в конфиге, она тебя спасёт. Проверка конфига: <code>sudo sshd -t</code>.</p>'},
+  {id:'0.4',t:'Firewall',need:['fw'],why:'Наружу должны смотреть только нужные порты: 22 (SSH), 80/443 (сайт). База и приложение — только внутри.',do:'Включить ufw: разрешить 22, 80, 443, всё остальное входящее — запретить.',done:'<code>sudo ufw status</code> — три правила; с другой машины порт 5432 недоступен.'},
+  {id:'0.5',t:'API «Магазин» на Node.js',need:['shell','files'],why:'Нужно само приложение, которое будем деплоить всю дальнейшую жизнь курса.',do:'Node.js API: <code>GET /health</code>, <code>GET /items</code>, <code>POST /items</code>. Пока данные в памяти. Код — в git-репозитории на GitLab.',done:'<code>curl localhost:3000/health</code> → <code>200 OK</code>; POST добавляет товар, GET его показывает.',hint:'<p>Express + 30 строк кода. Порт и прочие настройки — из переменных окружения (<code>process.env.PORT</code>), а не зашиты в код: это понадобится в Docker и Kubernetes.</p>'},
+  {id:'0.6',t:'Postgres руками',need:['pkgs','systemd'],why:'Данные в памяти пропадают при перезапуске. Настоящему магазину нужна база.',do:'Поставить PostgreSQL через apt, создать базу и пользователя, приложение читает и пишет товары в базу. Пароль — в <code>/opt/shop/.env</code> с правами 600.',done:'Перезапустил приложение — товары на месте. <code>ls -l /opt/shop/.env</code> → <code>-rw-------</code>.'},
+  {id:'0.7',t:'Приложение как systemd-сервис',need:['systemd','procs'],why:'Запущенное в терминале приложение умрёт, когда закроешь SSH, и не поднимется после перезагрузки.',do:'Unit-файл <code>shop.service</code>: запуск от deploy, автоперезапуск при падении, автостарт.',done:'<code>sudo reboot</code> → после загрузки <code>systemctl status shop</code> — active; <code>kill -9</code> процесса — через пару секунд он снова жив.'},
+  {id:'0.8',t:'Nginx перед приложением',need:['nginx'],why:'Приложение не должно торчать в интернет само: nginx принимает запросы на 80/443, пишет логи и передаёт их на localhost:3000.',do:'Конфиг reverse proxy в <code>sites-available/shop</code>, ссылка в sites-enabled, <code>nginx -t</code>, reload.',done:'<code>curl http://сервер/items</code> снаружи работает, порт 3000 снаружи закрыт.'},
+  {id:'0.9',t:'Разбор: логи и ресурсы',need:['text','res'],why:'Прод работает — значит, пора научиться видеть, что с ним происходит.',do:'Нагрузить API (цикл curl), найти в access.log топ адресов и коды ответа, посмотреть, сколько CPU и памяти ест node и postgres.',done:'Можешь одной строкой ответить: сколько запросов было за час, сколько 5xx, кто больше всех нагружает.'}]},
+ {id:'s1',n:'Спринт 1 · Docker',goal:'Упаковать магазин в контейнеры. Вспомни Спринт 0: ставить Node и Postgres руками, следить за версиями, писать unit-файлы — теперь это одна команда.',tickets:[
+  {id:'1.1',t:'Окружение Docker',need:['docker'],why:'Нужен сам инструмент.',do:'Docker Engine на сервере (или Docker Desktop локально), пользователь deploy в группе docker (и помни, что это равно root).',done:'<code>docker run hello-world</code> работает без sudo.'},
+  {id:'1.2',t:'Dockerfile, multi-stage',need:['dfile','multi'],why:'Образ должен быть маленьким и одинаковым везде: у тебя, в CI, на проде.',do:'Dockerfile для API: multi-stage сборка, <code>.dockerignore</code>, запуск не от root, healthcheck.',done:'<code>docker build -t shop .</code> + <code>docker run -p 3000:3000 shop</code> отвечает; образ меньше 200 МБ (<code>docker images</code>).'},
+  {id:'1.3',t:'docker-compose: API + Postgres + Redis',need:['compose','vol','dnet'],why:'Магазин — это несколько сервисов, которые должны найти друг друга и не терять данные.',do:'<code>docker-compose.yml</code>: api, postgres (с volume), redis. API ходит в базу по имени сервиса <code>db</code>.',done:'<code>docker compose up -d</code>; POST → <code>docker compose down</code> → <code>up</code> — данные на месте.'},
+  {id:'1.4',t:'Переезд прода в контейнеры',need:['compose','nginx'],why:'Закрываем Спринт 0: systemd-сервис и postgres из apt больше не нужны.',do:'Остановить старые сервисы, nginx проксирует на контейнер, деплой = <code>git pull && docker compose up -d --build</code>.',done:'Сайт работает из контейнеров, <code>systemctl status shop</code> — disabled.'}]},
+ {id:'s2',n:'Спринт 2 · Kubernetes',goal:'Перенести магазин в Kubernetes: самовосстановление, несколько копий, обновление без простоя.',tickets:[
+  {id:'2.1',t:'Кластер',need:['k8sarch','kubectl'],why:'Нужен учебный кластер.',do:'minikube или kind + kubectl.',done:'<code>kubectl get nodes</code> → Ready.'},
+  {id:'2.2',t:'Deployment + Service',need:['pod','deploy','svc'],why:'Описать магазин манифестами: сколько копий и как к ним достучаться.',do:'<code>deployment.yaml</code> (2 реплики) и <code>service.yaml</code>.',done:'Поды Running; удалил под — Kubernetes поднял новый.'},
+  {id:'2.3',t:'ConfigMap и Secret',need:['cfg'],why:'Настройки и пароль от базы не должны быть зашиты в образ.',do:'Env — в ConfigMap, пароль БД — в Secret, приложение читает их как переменные окружения.',done:'Поменял значение в ConfigMap + rollout restart — приложение видит новое.'},
+  {id:'2.4',t:'Ingress',need:['ingress'],why:'Доступ к магазину по имени, как к настоящему сайту.',do:'Ingress-аддон minikube, правило для <code>myapp.local</code>.',done:'<code>curl http://myapp.local/items</code> работает.'},
+  {id:'2.5',t:'Probes и ресурсы',need:['probes','qos'],why:'Kubernetes должен знать, жив ли под и готов ли принимать трафик, и сколько ресурсов ему дать.',do:'liveness и readiness на <code>/health</code>, requests/limits.',done:'Сломал /health — под перезапускается; <code>kubectl describe pod</code> показывает пробы.'}]},
+ {id:'s3',n:'Спринт 3 · Helm',goal:'Весь стек одной командой и разные настройки для разных окружений.',tickets:[
+  {id:'3.1',t:'Свой чарт',need:['helm'],why:'Десяток YAML-файлов руками применять неудобно и опасно.',do:'<code>helm create shop</code>, перенести манифесты в шаблоны.',done:'<code>helm install shop ./shop</code> разворачивает всё.'},
+  {id:'3.2',t:'values.yaml',need:['helm'],why:'Тег образа, число реплик, env — должны меняться без правки шаблонов.',do:'Вынести переменные в values, сделать <code>values-prod.yaml</code>.',done:'<code>helm upgrade --set replicaCount=3</code> меняет реплики; <code>helm rollback</code> возвращает.'},
+  {id:'3.3',t:'Postgres и Redis из чартов',need:['helm','storage'],why:'Не писать базу самому, а взять проверенный чарт.',do:'Bitnami-чарты postgresql и redis отдельными релизами.',done:'<code>helm list</code> — 3 релиза; данные переживают удаление пода базы (PVC).'}]},
+ {id:'s4',n:'Спринт 4 · GitLab CI/CD',goal:'Push в git → образ собран, протестирован и выкачен сам.',tickets:[
+  {id:'4.1',t:'Пайплайн lint → build → test',need:['gitlabci','runners'],why:'Сломанный код не должен доезжать до прода.',do:'<code>.gitlab-ci.yml</code> со стадиями lint, build, test.',done:'MR с ошибкой в тесте — пайплайн красный.'},
+  {id:'4.2',t:'Образ в Container Registry',need:['gitlabci','registry'],why:'Кластер должен откуда-то брать образ нужной версии.',do:'Сборка и push в GitLab Registry с тегом <code>$CI_COMMIT_SHA</code>.',done:'Образ виден в Registry, тег совпадает с коммитом.'},
+  {id:'4.3',t:'Автодеплой через helm upgrade',need:['gitlabci','helm'],why:'Деплой без рук и без «а кто последний выкатывал?».',do:'Job deploy: <code>helm upgrade --install</code> с новым тегом; main — деплой, MR — только тесты.',done:'Push в main → через пару минут в кластере новая версия.'},
+  {id:'4.4',t:'Секреты из Vault',need:['vault'],why:'Пароли не должны лежать в репозитории и переменных CI открытым текстом.',do:'Пайплайн получает пароль БД из Vault и передаёт в Secret.',done:'В репозитории и логах CI пароля нет.'}]},
+ {id:'s5',n:'Спринт 5 · Наблюдаемость',goal:'Видеть, что происходит с магазином, раньше, чем напишут пользователи.',tickets:[
+  {id:'5.1',t:'Prometheus + Grafana',need:['prom','helm'],why:'Нужны сбор метрик и дашборды.',do:'<code>kube-prometheus-stack</code> через Helm.',done:'Grafana открывается через port-forward.'},
+  {id:'5.2',t:'/metrics в приложении',need:['prom'],why:'Метрики самого магазина: сколько запросов, как быстро, сколько ошибок.',do:'<code>prom-client</code>, эндпоинт <code>/metrics</code>, ServiceMonitor.',done:'В Prometheus есть метрики shop.'},
+  {id:'5.3',t:'Дашборд RPS / latency / errors',need:['grafana'],why:'Три графика, по которым видно здоровье любого сервиса.',do:'Панели: RPS, p95 latency, error rate (5xx).',done:'Можешь объяснить каждую панель вслух.'},
+  {id:'5.4',t:'Алерт',need:['grafana'],why:'Узнавать о падении от алерта, а не от менеджера.',do:'Alertmanager: «сервис недоступен больше 1 минуты» → Telegram.',done:'Выключил деплоймент — через минуту пришло сообщение.'}]},
+ {id:'s6',n:'Спринт 6 · Terraform',goal:'Вся инфраструктура описана кодом и поднимается с нуля одной командой.',tickets:[
+  {id:'6.1',t:'Первый .tf',need:['tf1'],why:'Сервер из Спринта 0 ты создавал кликами — повторить точно так же уже нельзя.',do:'Provider облака, ресурс сервера, SSH-ключ.',done:'<code>terraform apply</code> создаёт сервер, <code>destroy</code> — удаляет.'},
+  {id:'6.2',t:'Variables, outputs, firewall',need:['tf1','tfmod'],why:'Один код для dev и prod.',do:'Переменные, outputs (IP сервера), правила firewall в Terraform.',done:'IP нового сервера выводится после apply.'},
+  {id:'6.3',t:'Remote state',need:['tfstate'],why:'State на ноутбуке = потерял ноутбук — потерял знание о своей инфраструктуре; вдвоём работать нельзя.',do:'Backend в S3 (versioning, запрет удаления) или GitLab, блокировка state.',done:'State не лежит локально; видно его версии.'},
+  {id:'6.4',t:'Terraform в CI',need:['tfstate','gitlabci'],why:'Изменения инфраструктуры проходят ревью, как код.',do:'<code>terraform plan</code> на MR, <code>apply</code> на main.',done:'В MR видно, что изменится в инфраструктуре.'}]},
+ {id:'s7',n:'Спринт 7 · Полировка и собес',goal:'Превратить проект в историю, которую ты уверенно рассказываешь.',tickets:[
+  {id:'7.1',t:'README и схема',need:['incident'],why:'Репозиторий смотрят до собеса.',do:'README: что это, схема архитектуры, как запустить, что где лежит.',done:'Человек без контекста понимает проект за 2 минуты.'},
+  {id:'7.2',t:'Учебный инцидент',need:['incident'],why:'На собесе спросят «расскажи, как чинил прод».',do:'Сломать намеренно (неверный selector, нет пароля в Secret, лимит памяти) и найти через describe, logs, Grafana.',done:'Записан разбор: симптом → диагностика → причина → исправление.'},
+  {id:'7.3',t:'Рассказ на 2–3 минуты',need:['incident'],why:'Умение рассказать важно не меньше умения сделать.',do:'Что построил, с чем столкнулся, как решил. Проговорить вслух 5 раз.',done:'Укладываешься в 3 минуты без бумажки.'},
+  {id:'7.4',t:'Резюме',need:['incident'],why:'Проект должен работать на тебя.',do:'Ссылка на репозиторий, стек (Linux, Docker, K8s, Helm, GitLab CI, Prometheus, Terraform).',done:'Резюме отправлено.'}]}]};
+const TICKETS=PROJECT.sprints.flatMap(s=>s.tickets.map(t=>Object.assign({sp:s},t)));
+/* Тикеты, для которых этот модуль — последний из нужных по плану (т. е. после него тикет можно делать) */
+const ticketsAfter=id=>{const plan=LEVELS.flatMap(l=>l.ids);return TICKETS.filter(t=>t.need.length&&t.need.reduce((a,b)=>plan.indexOf(a)>plan.indexOf(b)?a:b)===id)};
 /* Задания. Общие поля: t (тип), q (вопрос, html), e (почему — обязательно), g (группа), ref (id прошлой темы для ↺), code+lang (блок кода).
    t:'c'  выбор       {o:[варианты], a:индекс верного}        — варианты перемешиваются
    t:'r'  чтение      то же, что 'c', но с логом/конфигом в code
@@ -993,7 +1052,7 @@ function exRight(x){
 /* Приложение: прогресс (localStorage), маршруты, экраны.
    #home главная · #m-<id>-<вкладка> модуль (theory|ex|lab|qa) · #cheat · #qa · #todo «Надо разобрать» */
 const KEY='devops-v1';
-const P=Object.assign({done:{},open:{},todo:[],lab:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
+const P=Object.assign({done:{},open:{},todo:[],lab:{},proj:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
 const $=s=>document.querySelector(s);
 const score=id=>{const m=MODS[id],d=P.done[id]||{};const n=m.ex.length;const ok=Object.values(d).filter(v=>v===1).length;return {n,ok,pct:n?ok/n:0}};
@@ -1002,7 +1061,7 @@ const groupOf=x=>x.ref?'mix':x.g||'base';
 const plain=s=>String(s).replace(/<[^>]+>/g,'');
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
     return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
@@ -1021,9 +1080,10 @@ function modView(id,tab){
   if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
   const early=earlyTerms(id);const caseBox=m.case?`<section class="case"><h2>Ситуация</h2>${m.case}</section>`:'';const earlyBox=early.length?`<details class="early"><summary>В этом модуле встретятся инструменты, которых ещё не было (${early.length}). Что это и зачем они нужны — раскрой</summary>${early.map(t=>termHTML(t)).join('')}</details>`:'';
+  const tk=ticketsAfter(id);const projBox=tk.length?`<section class="projbox"><h2>🛠 В проекте «Магазин»</h2><p>После этого модуля можно делать:</p>${tk.map(t=>`<p>→ <a href="#project">Тикет ${t.id} · ${t.t}</a> — ${t.why}</p>`).join('')}</section>`:'';
   if(tab==='theory')h+=caseBox;
   if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
-  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
+  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox;
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
     const d=P.done[id]||{};let last='';
@@ -1032,6 +1092,7 @@ function modView(id,tab){
     if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#m-${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
   if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. Делай на своей машине (WSL, VirtualBox с Ubuntu, VPS) — не на рабочем сервере.</p>','warn')+
     m.lab.map((l,k)=>{const dn=(P.lab[id]||{})[k];return `<div class="lab${dn?' ok':''}"><div class="exh"><span class="tag">Лаба ${k+1}</span><label><input type="checkbox" class="labdone" data-id="${id}" data-k="${k}"${dn?' checked':''}> сделал сам</label></div><div class="q">${l.t}</div>${l.h?`<details><summary>Подсказка</summary>${l.h}</details>`:''}${l.chk?`<details><summary>Как проверить себя</summary>${l.chk}</details>`:''}${l.sol?`<details class="sol"><summary>Решение (только после попытки)</summary>${l.sol}</details>`:''}</div>`}).join('');
+  if(tab==='lab')h+=projBox;
   if(tab==='qa')h+=`<p class="muted">Сначала ответь вслух сам, потом раскрой.</p>`+m.qa.map(([q,a])=>`<details class="qa"><summary>${q}</summary><div>${a}</div></details>`).join('');
   return h}
 
@@ -1039,12 +1100,17 @@ function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wi
 function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
   return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
     shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
+const modLink=id=>MODS[id]?`<a href="#m-${id}">${MODS[id].title}</a>${score(id).pct>=PASS?' ✓':''}`:`<span class="muted">${id} (модуль в работе)</span>`;
+const ready=t=>t.need.every(id=>MODS[id]&&score(id).pct>=PASS);
+function ticketHTML(t){const dn=P.proj[t.id],r=ready(t);return `<div class="ticket${dn?' ok':''}"><div class="exh"><span class="tag">Тикет ${t.id}</span><span class="${r?'rdy':'nrdy'}">${dn?'сделано':r?'можно делать':'сначала пройди модули'}</span><label><input type="checkbox" class="projdone" data-id="${t.id}"${dn?' checked':''}> сделал</label></div><h3>${t.t}</h3><p><b>Зачем:</b> ${t.why}</p><p><b>Что сделать:</b> ${t.do}</p><p><b>Готово, когда:</b> ${t.done}</p>${t.hint?`<details><summary>Подсказка</summary>${t.hint}</details>`:''}<p class="muted">Готовят модули: ${t.need.map(modLink).join(' · ')}</p></div>`}
+function project(){const n=TICKETS.length,d=TICKETS.filter(t=>P.proj[t.id]).length;
+  return `<h1>Проект «Магазин»</h1><p class="sub">${PROJECT.goal}</p>`+BOX('Как работать с проектом','<p>Это не задания с ответами, а настоящая работа: делаешь руками на своём сервере, без ИИ, и коммитишь в свой GitLab. Тикет становится «можно делать», когда пройдены модули, которые к нему готовят. Модули объясняют, <b>как</b>; проект показывает, <b>зачем</b> всё это вместе.</p>')+`<div class="stats"><div><b>${d}/${n}</b>тикетов сделано</div></div>`+PROJECT.sprints.map(s=>`<section><h2>${s.n}</h2><p class="sub">${s.goal}</p>${s.tickets.map(ticketHTML).join('')}</section>`).join('')}
 function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Каждый инструмент: что это, зачем он вообще нужен, где живёт на сервере и в какой ситуации ты с ним столкнёшься.</p>`+TERMS.map(t=>termHTML(t)).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():home();
+  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home();
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 
@@ -1054,6 +1120,7 @@ document.addEventListener('click',ev=>{
   if(t.id==='burger')return document.body.classList.toggle('menu');
   if(cl('force')){P.open[t.dataset.id]=true;save();return route()}
   if(cl('reset')){if(t.dataset.sure){delete P.done[t.dataset.id];save();route()}else{t.dataset.sure=1;t.textContent='Точно сбросить? Нажми ещё раз'}return}
+  if(cl('projdone')){P.proj[t.dataset.id]=t.checked;save();return route()}
   if(cl('labdone')){(P.lab[t.dataset.id]=P.lab[t.dataset.id]||{})[t.dataset.k]=t.checked;save();t.closest('.lab').classList.toggle('ok',t.checked);return}
   if(cl('totodo')){if(!P.todo.includes(t.dataset.t))P.todo.push(t.dataset.t);save();t.textContent='Добавлено ✓';return}
   if(t.id==='tda'){const v=$('#tdi').value.trim();if(v){P.todo.push(v);save();route()}return}

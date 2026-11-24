@@ -1,7 +1,7 @@
 /* Приложение: прогресс (localStorage), маршруты, экраны.
    #home главная · #m-<id>-<вкладка> модуль (theory|ex|lab|qa) · #cheat · #qa · #todo «Надо разобрать» */
 const KEY='devops-v1';
-const P=Object.assign({done:{},open:{},todo:[],lab:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
+const P=Object.assign({done:{},open:{},todo:[],lab:{},proj:{}},(()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}})());
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
 const $=s=>document.querySelector(s);
 const score=id=>{const m=MODS[id],d=P.done[id]||{};const n=m.ex.length;const ok=Object.values(d).filter(v=>v===1).length;return {n,ok,pct:n?ok/n:0}};
@@ -10,7 +10,7 @@ const groupOf=x=>x.ref?'mix':x.g||'base';
 const plain=s=>String(s).replace(/<[^>]+>/g,'');
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#project">🛠 Проект «Магазин»</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
     return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
@@ -29,9 +29,10 @@ function modView(id,tab){
   if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
   const early=earlyTerms(id);const caseBox=m.case?`<section class="case"><h2>Ситуация</h2>${m.case}</section>`:'';const earlyBox=early.length?`<details class="early"><summary>В этом модуле встретятся инструменты, которых ещё не было (${early.length}). Что это и зачем они нужны — раскрой</summary>${early.map(t=>termHTML(t)).join('')}</details>`:'';
+  const tk=ticketsAfter(id);const projBox=tk.length?`<section class="projbox"><h2>🛠 В проекте «Магазин»</h2><p>После этого модуля можно делать:</p>${tk.map(t=>`<p>→ <a href="#project">Тикет ${t.id} · ${t.t}</a> — ${t.why}</p>`).join('')}</section>`:'';
   if(tab==='theory')h+=caseBox;
   if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
-  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
+  if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'')+projBox;
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
     const d=P.done[id]||{};let last='';
@@ -40,6 +41,7 @@ function modView(id,tab){
     if(next)h+=`<p class="nextp">${s.pct>=PASS?`<a class="btn" href="#m-${next}">Дальше: ${MODS[next].title} →</a>`:`Для перехода дальше нужно ${PASS*100}%.`}</p>`}
   if(tab==='lab')h+=BOX('Правила лабы','<p>Терминал, без ИИ и без копипасты из решения. Порядок: подумай → <code>man</code> / <code>--help</code> → подсказка → решение. Делай на своей машине (WSL, VirtualBox с Ubuntu, VPS) — не на рабочем сервере.</p>','warn')+
     m.lab.map((l,k)=>{const dn=(P.lab[id]||{})[k];return `<div class="lab${dn?' ok':''}"><div class="exh"><span class="tag">Лаба ${k+1}</span><label><input type="checkbox" class="labdone" data-id="${id}" data-k="${k}"${dn?' checked':''}> сделал сам</label></div><div class="q">${l.t}</div>${l.h?`<details><summary>Подсказка</summary>${l.h}</details>`:''}${l.chk?`<details><summary>Как проверить себя</summary>${l.chk}</details>`:''}${l.sol?`<details class="sol"><summary>Решение (только после попытки)</summary>${l.sol}</details>`:''}</div>`}).join('');
+  if(tab==='lab')h+=projBox;
   if(tab==='qa')h+=`<p class="muted">Сначала ответь вслух сам, потом раскрой.</p>`+m.qa.map(([q,a])=>`<details class="qa"><summary>${q}</summary><div>${a}</div></details>`).join('');
   return h}
 
@@ -47,12 +49,17 @@ function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wi
 function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
   return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
     shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
+const modLink=id=>MODS[id]?`<a href="#m-${id}">${MODS[id].title}</a>${score(id).pct>=PASS?' ✓':''}`:`<span class="muted">${id} (модуль в работе)</span>`;
+const ready=t=>t.need.every(id=>MODS[id]&&score(id).pct>=PASS);
+function ticketHTML(t){const dn=P.proj[t.id],r=ready(t);return `<div class="ticket${dn?' ok':''}"><div class="exh"><span class="tag">Тикет ${t.id}</span><span class="${r?'rdy':'nrdy'}">${dn?'сделано':r?'можно делать':'сначала пройди модули'}</span><label><input type="checkbox" class="projdone" data-id="${t.id}"${dn?' checked':''}> сделал</label></div><h3>${t.t}</h3><p><b>Зачем:</b> ${t.why}</p><p><b>Что сделать:</b> ${t.do}</p><p><b>Готово, когда:</b> ${t.done}</p>${t.hint?`<details><summary>Подсказка</summary>${t.hint}</details>`:''}<p class="muted">Готовят модули: ${t.need.map(modLink).join(' · ')}</p></div>`}
+function project(){const n=TICKETS.length,d=TICKETS.filter(t=>P.proj[t.id]).length;
+  return `<h1>Проект «Магазин»</h1><p class="sub">${PROJECT.goal}</p>`+BOX('Как работать с проектом','<p>Это не задания с ответами, а настоящая работа: делаешь руками на своём сервере, без ИИ, и коммитишь в свой GitLab. Тикет становится «можно делать», когда пройдены модули, которые к нему готовят. Модули объясняют, <b>как</b>; проект показывает, <b>зачем</b> всё это вместе.</p>')+`<div class="stats"><div><b>${d}/${n}</b>тикетов сделано</div></div>`+PROJECT.sprints.map(s=>`<section><h2>${s.n}</h2><p class="sub">${s.goal}</p>${s.tickets.map(ticketHTML).join('')}</section>`).join('')}
 function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Каждый инструмент: что это, зачем он вообще нужен, где живёт на сервере и в какой ситуации ты с ним столкнёшься.</p>`+TERMS.map(t=>termHTML(t)).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():home();
+  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():a==='project'?project():home();
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 
@@ -62,6 +69,7 @@ document.addEventListener('click',ev=>{
   if(t.id==='burger')return document.body.classList.toggle('menu');
   if(cl('force')){P.open[t.dataset.id]=true;save();return route()}
   if(cl('reset')){if(t.dataset.sure){delete P.done[t.dataset.id];save();route()}else{t.dataset.sure=1;t.textContent='Точно сбросить? Нажми ещё раз'}return}
+  if(cl('projdone')){P.proj[t.dataset.id]=t.checked;save();return route()}
   if(cl('labdone')){(P.lab[t.dataset.id]=P.lab[t.dataset.id]||{})[t.dataset.k]=t.checked;save();t.closest('.lab').classList.toggle('ok',t.checked);return}
   if(cl('totodo')){if(!P.todo.includes(t.dataset.t))P.todo.push(t.dataset.t);save();t.textContent='Добавлено ✓';return}
   if(t.id==='tda'){const v=$('#tdi').value.trim();if(v){P.todo.push(v);save();route()}return}
