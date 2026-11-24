@@ -28,7 +28,8 @@ function modView(id,tab){
     .filter(([k])=>(k!=='lab'||m.lab.length)&&(k!=='qa'||m.qa.length)&&(k!=='theory'||m.theory));
   if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
-  const early=earlyTerms(id);const earlyBox=early.length?`<details class="early"${tab==='theory'?' open':''}><summary>Встретятся инструменты, которые ещё не проходили (${early.length}) — коротко, что это</summary>${early.map(termHTML).join('')}</details>`:'';
+  const early=earlyTerms(id);const caseBox=m.case?`<section class="case"><h2>Ситуация</h2>${m.case}</section>`:'';const earlyBox=early.length?`<details class="early"><summary>В этом модуле встретятся инструменты, которых ещё не было (${early.length}). Что это и зачем они нужны — раскрой</summary>${early.map(t=>termHTML(t)).join('')}</details>`:'';
+  if(tab==='theory')h+=caseBox;
   if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
   if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
   if(tab==='ex'){
@@ -46,7 +47,7 @@ function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wi
 function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
   return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
     shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
-function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Коротко: что это и зачем. Подробно — в модуле по ссылке.</p>`+TERMS.map(termHTML).join('')}
+function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Каждый инструмент: что это, зачем он вообще нужен, где живёт на сервере и в какой ситуации ты с ним столкнёшься.</p>`+TERMS.map(t=>termHTML(t)).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){

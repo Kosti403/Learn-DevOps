@@ -81,4 +81,7 @@ button:hover{border-color:var(--mu)}
 
 .early{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--s);border-radius:8px;padding:10px 14px;margin:14px 0}
 .early summary{font-weight:600;color:var(--s)}
-.term{padding:8px 0;border-bottom:1px solid var(--ln)}.term:last-child{border:0}
+.term{background:var(--pn2);border-radius:8px;padding:8px 12px;margin:8px 0}.term>summary{font-weight:700;cursor:pointer}
+.term dl{margin:8px 0 0}.term dt{color:var(--ac);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-top:10px}.term dd{margin:2px 0 0}
+.case{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--mix);border-radius:8px;padding:2px 18px 10px;margin-top:14px}.case h2{color:var(--mix)}
+.goal{background:var(--pn2);border-radius:6px;padding:8px 12px}

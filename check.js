@@ -7,7 +7,7 @@ vm.runInContext(src,ctx);
 const {MODS,ORDER}=ctx;let err=0;const bad=(id,k,m)=>{err++;console.log(`✗ ${id}#${k+1}: ${m}`)};
 if(process.argv.includes('--map'))ORDER.forEach((id,i)=>{const m=MODS[id];console.log(String(i+1).padStart(2),m.lvl.padEnd(3),id.padEnd(9),String(m.ex.length).padStart(3),'заданий','лаб',m.lab.length,'qa',m.qa.length,'·',m.title)});
 ORDER.forEach((id,i)=>{const m=MODS[id];
-  if(!m.review&&!m.intro)bad(id,-1,'нет intro');
+  if(!m.review&&!m.intro)bad(id,-1,'нет intro');if(!m.case)bad(id,-1,'нет блока «Ситуация» (case)');
   if(m.ex.length<20||m.ex.length>28)console.log(`! ${id}: заданий ${m.ex.length} (норма 22–28)`);
   const okTags=/^(p|b|i|a|ol|ul|li|code|mark|h2|h3|br|div|span|table|thead|tbody|tr|td|th|pre|details|summary|section|em|strong|sup|sub|small|u)$/;
   const txt=JSON.stringify([m.intro,m.theory,m.memo,m.traps,m.ex,m.lab,m.qa]);(txt.match(/<\/?[a-zA-Zа-яА-Я][^\s>\/]*/g)||[]).forEach(t=>{if(!okTags.test(t.replace(/[</]/g,'')))bad(id,-1,'странный тег '+t)});
