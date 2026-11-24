@@ -2564,17 +2564,17 @@ const ticketsAfter=id=>{const plan=LEVELS.flatMap(l=>l.ids);return TICKETS.filte
 const LINKS=[
  {g:'Общее',t:'BoostMentor — гайд по DevOps',u:'https://boostmentor.ru/guides/devops',n:'опорный гайд курса: план тем и вопросы',mod:[]},
  {g:'Общее',t:'Ultimate DevOps Guide (GitHub)',u:'https://github.com/boost-mentor/ultimate-devops-guide',n:'тот же гайд в репозитории',mod:[]},
- {g:'Общее',t:'Habr: статья (в заметках — «Habr DevOps»)',u:'https://habr.com/ru/articles/865040/',n:'тема не проверялась',mod:[]},
- {g:'Общее',t:'Habr, МКБ (в заметках — «Habr MKB»)',u:'https://habr.com/ru/companies/mkb/articles/852280/',n:'тема не проверялась',mod:[]},
- {g:'Общее',t:'Habr, VK: статья 1',u:'https://habr.com/ru/companies/vk/articles/792368/',n:'тема не проверялась',mod:[]},
- {g:'Общее',t:'Habr, VK: статья 2',u:'https://habr.com/ru/companies/vk/articles/809447/',n:'тема не проверялась',mod:[]},
+ {g:'Сеть и HTTP',t:'Habr: HTTP-запросы — структура, методы, строка статуса и коды состояния',u:'https://habr.com/ru/articles/865040/',n:'разбор запроса и ответа, методов и кодов 1xx–5xx — дополнение к модулю DNS и HTTP',mod:['dns','web']},
+ {g:'CI/CD и раннеры',t:'Habr, МКБ: автоматизация тестирования с SoapUI — практическое руководство',u:'https://habr.com/ru/companies/mkb/articles/852280/',n:'тесты SOAP/REST-сервисов, проверки через запрос в базу (JDBC); про встраивание в CI/CD в статье мало',mod:['gitlabci']},
+ {g:'Профессия: Platform Engineering',t:'Habr, VK: Who are you, Platform Engineering. Часть 1',u:'https://habr.com/ru/companies/vk/articles/792368/',n:'что такое Platform Engineering и внутренняя платформа разработки (IDP), какие проблемы решает — куда растёт DevOps',mod:[]},
+ {g:'Профессия: Platform Engineering',t:'Habr, VK: Platform Engineering. Часть 2 — типовая архитектура IDP',u:'https://habr.com/ru/companies/vk/articles/809447/',n:'из чего состоит платформа: портал, Git, CI/CD, артефакты, деплой инфраструктуры, AppSec; сравнение Azure DevOps и GitLab',mod:['gitlabci','runners']},
  {g:'Контейнеры и Kubernetes',t:'Видео: Kubernetes с нуля (по нему идут уровни 2–3)',u:'https://www.youtube.com/watch?v=6mhlHDJOQAw',n:'тайм-коды разложены по модулям в ROADMAP',mod:['ctr','docker','dfile','multi','dnet','compose','orch','k8sarch','k8scomp','raft','kubectl','pod','deploy','sts','probes','qos','svc','ingress','cfg','jobs','storage']},
  {g:'CI/CD и раннеры',t:'Настройка CI/CD для GitLab-репозитория: схемы и гайд по шагам',u:'https://lred.ru/webmasteru/36074-nastrojka-cicd-dlya-gitlab-repozitoriya-skhemy-i-gajd-po-shagam',n:'в заметках — «GitLab CI/CD — настройка пошагово»',mod:['gitlabci']},
  {g:'CI/CD и раннеры',t:'Reddit r/devops: как подключиться к VPN внутри пайплайна',u:'https://www.reddit.com/r/devops/comments/u2enye/how_to_connect_to_vpn_inside_pipeline/',n:'когда сервер для деплоя доступен только через VPN',mod:['runners','gitlabci']},
  {g:'CI/CD и раннеры',t:'Reddit r/gitlab: GitLab CI — деплой через VPN',u:'https://www.reddit.com/r/gitlab/comments/a6htul/gitlab_ci_how_to_deploy_via_vpn/?tl=ru',n:'та же задача, обсуждение для GitLab',mod:['runners','gitlabci']},
  {g:'CI/CD и раннеры',t:'Self-hosted агенты для Azure Pipelines (Medium)',u:'https://vijayasimhabr.medium.com/configure-self-hosted-agents-for-azure-pipelines-devops-933cb58c795a',n:'свой раннер внутри закрытой сети — альтернатива VPN в пайплайне',mod:['runners']},
- {g:'CI/CD и раннеры',t:'Azure на GitHub (в заметках — «Azure Mission Critical — Private Agents Setup»)',u:'https://github.com/Azure/',n:'ссылка ведёт на всю организацию Azure; нужный репозиторий — поиск «Mission-Critical» внутри',mod:['runners']},
- {g:'CI/CD и раннеры',t:'Видео по теме (из заметок)',u:'https://www.youtube.com/watch?v=Ce-HDCrXMtQ',n:'в заметках стоит рядом с ссылками про раннеры и VPN; тема не проверялась',mod:[]}];
+ {g:'CI/CD и раннеры',t:'Azure на GitHub (в заметках — «Azure Mission Critical — Private Agents Setup»)',u:'https://github.com/Azure/',n:'ссылка ведёт на всю организацию Azure; репозитории Mission-Critical-Online/Connected по прямому адресу не открываются (404) — искать поиском внутри организации',mod:['runners']},
+ {g:'Сеть и HTTP',t:'Видео: «Всё, что надо знать про интернет»',u:'https://www.youtube.com/watch?v=Ce-HDCrXMtQ',n:'тема по названию (описание YouTube не открылось) — к модулям про сеть',mod:['net1','web']}];
 const linksFor=id=>LINKS.filter(l=>l.mod.includes(id));
 /* Задания. Общие поля: t (тип), q (вопрос, html), e (почему — обязательно), g (группа), ref (id прошлой темы для ↺), code+lang (блок кода).
    t:'c'  выбор       {o:[варианты], a:индекс верного}        — варианты перемешиваются
