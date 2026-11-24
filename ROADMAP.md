@@ -32,11 +32,12 @@ Node.js CRUD API + **MS SQL Server** (Oracle — легаси-тикет 1.5) �
 | 15 | net1 | Сеть: IP, маска, порты, TCP/UDP, ss, curl, ping | ✅ |
 | 16 | r2 | **Обзор 2** (1–15) | ✅ |
 | 17 | dns | DNS и HTTP: dig, /etc/hosts, коды, заголовки | ✅ |
-| 18 | ssh | SSH: рукопожатие, ключи хоста и пользователя, ed25519/rsa/ecdsa, known_hosts, agent, config | ⬜ |
-| 19 | fw | Firewall: ufw, iptables | ⬜ |
-| 20 | nginx | Nginx: reverse proxy, upstream, A/B-слоты, nginx -t | ⬜ |
-| 21 | git | Git для DevOps | ⬜ |
-| 22 | inc1 | **Разбор инцидента 1**: магазин на голом сервере не отвечает (диск, права, сервис, nginx) | ⬜ |
+| 18 | web | Что происходит, когда вводишь адрес: OSI (7 уровней), инкапсуляция, DHCP, ARP, L4 vs L7, сквозной разбор | ✅ |
+| 19 | ssh | SSH: рукопожатие, ключи хоста и пользователя, ed25519/rsa/ecdsa, known_hosts, agent, config | ⬜ |
+| 20 | fw | Firewall: ufw, iptables | ⬜ |
+| 21 | nginx | Nginx: reverse proxy, upstream, A/B-слоты, nginx -t | ⬜ |
+| 22 | git | Git для DevOps | ⬜ |
+| 23 | inc1 | **Разбор инцидента 1**: магазин на голом сервере не отвечает (диск, права, сервис, nginx) | ⬜ |
 
 ## Уровень 2 · Контейнеры (Л2) — с модуля 29 лёгкое смешивание, с 33 усложнено
 | id | Тема | Видео |
