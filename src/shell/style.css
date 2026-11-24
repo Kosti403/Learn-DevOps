@@ -78,3 +78,7 @@ button:hover{border-color:var(--mu)}
   #burger{display:block;position:fixed;z-index:10;top:10px;left:10px}
   h1{font-size:23px}
 }
+
+.early{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--s);border-radius:8px;padding:10px 14px;margin:14px 0}
+.early summary{font-weight:600;color:var(--s)}
+.term{padding:8px 0;border-bottom:1px solid var(--ln)}.term:last-child{border:0}

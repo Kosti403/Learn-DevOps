@@ -77,7 +77,11 @@ button:hover{border-color:var(--mu)}
   body.menu #side{transform:none;box-shadow:0 0 0 100vmax #0009}
   #burger{display:block;position:fixed;z-index:10;top:10px;left:10px}
   h1{font-size:23px}
-}</style><button id="burger" aria-label="Меню">☰ Модули</button>
+}
+
+.early{background:var(--pn);border:1px solid var(--ln);border-left:3px solid var(--s);border-radius:8px;padding:10px 14px;margin:14px 0}
+.early summary{font-weight:600;color:var(--s)}
+.term{padding:8px 0;border-bottom:1px solid var(--ln)}.term:last-child{border:0}</style><button id="burger" aria-label="Меню">☰ Модули</button>
 <nav id="side"></nav>
 <main id="main"></main><script>/* Помощники для текста модулей. Всё глобально (один файл после сборки).
    esc(s)             — экранировать HTML
@@ -714,6 +718,116 @@ qa:[
  ['Зачем set -o pipefail?','По умолчанию код пайпа — код последней команды, и падение в середине теряется. pipefail возвращает ошибку, если упала любая часть.'],
  ['Зачем tee и xargs?','tee — раздваивает поток: на экран и в файл (и запись от root через sudo tee). xargs — превращает строки stdin в аргументы команды, которая stdin не читает (rm, kill).']],
 cheat:[['cmd > file 2>&1','всё в файл'],['cmd >> file','дописать'],['cmd 2>/dev/null','скрыть ошибки'],['cmd 2>&1 | grep x','ошибки тоже в пайп'],['cmd | tee file','экран + файл'],['echo $?','код последней команды'],['a && b || c','если успех — b, иначе c'],['set -o pipefail','ошибка любой части пайпа'],['find … -print0 | xargs -0 cmd','строки → аргументы'],['x=$(cmd)','вывод в переменную']]});
+/* text · L1 · Обработка текста: grep, cut, sort, uniq, wc, awk, sed — на логе nginx */
+MOD({id:'text',title:'Текст и логи: grep, sort, uniq, awk, sed',sub:'Как за минуту ответить на вопрос «что происходит с сайтом» по логу на миллион строк.',
+intro:`<p>Почти всё на сервере — текст: логи, конфиги, вывод команд. Когда на проде что-то не так, ответ обычно лежит в логе. Но лог — это миллион строк, глазами его не прочитать.</p>
+<p>Для этого есть набор маленьких утилит, каждая делает одно дело: <b>grep</b> отбирает строки, <b>cut</b> и <b>awk</b> вырезают нужные столбцы, <b>sort</b> сортирует, <b>uniq</b> схлопывает повторы, <b>wc</b> считает, <b>sed</b> заменяет. Соединяешь их пайпами (модуль 5) — и получаешь ответ на вопрос вроде «с каких IP больше всего ошибок за последний час».</p>
+<p>Учиться будем на логе <b>nginx</b> — это самый частый лог, который ты будешь разбирать. Ниже сначала коротко: что это за программа и что в её логе.</p>`,
+theory:`<h2>Сначала: что такое nginx и его лог</h2>
+<p><b>Nginx</b> (читается «энджин-икс») — веб-сервер. Он стоит «на входе» сайта: принимает запросы браузеров и либо сам отдаёт файлы (HTML, картинки), либо передаёт запрос твоему приложению и возвращает ответ. Подробно (настройка, reverse proxy) — в модуле «Nginx», сейчас нам нужен только его лог.</p>
+<p>На <b>каждый</b> запрос nginx дописывает одну строку в <code>/var/log/nginx/access.log</code>. Формат по умолчанию называется <i>combined</i>:</p>
+${C(`203.0.113.7 - - [24/Nov/2026:10:15:32 +0300] "GET /api/orders HTTP/1.1" 500 162 "-" "curl/8.5.0"`,'out')}
+${tbl(['Поле (номер при делении по пробелам)','Значение','Что это'],[
+ ['$1','<code>203.0.113.7</code>','IP клиента'],
+ ['$2, $3','<code>- -</code>','не используется / имя пользователя (обычно пусто)'],
+ ['$4, $5','<code>[24/Nov/2026:10:15:32 +0300]</code>','время запроса и часовой пояс'],
+ ['$6, $7, $8','<code>"GET /api/orders HTTP/1.1"</code>','метод, путь, версия протокола'],
+ ['<b>$9</b>','<code>500</code>','<mark>код ответа</mark>: 2xx ок, 3xx перенаправление, 4xx ошибка клиента (404 — нет такой страницы), 5xx ошибка сервера'],
+ ['$10','<code>162</code>','размер ответа в байтах'],
+ ['$11','<code>"-"</code>','referer — откуда пришёл'],
+ ['$12…','<code>"curl/8.5.0"</code>','user agent — чем пришёл (браузер, бот, curl)']])}
+<p>Ошибки самого nginx (не смог соединиться с приложением, нет прав на файл) — в соседнем <code>error.log</code>. Старые логи каждую ночь переименовываются в <code>access.log.1</code>, потом сжимаются в <code>access.log.2.gz</code> — это <b>ротация</b> (программа logrotate), чтобы логи не съели диск.</p>
+<h2>grep — отобрать строки</h2>
+${CMDS([['grep "500" access.log','строки, где есть 500'],['grep -i error app.log','без учёта регистра'],['grep -v healthcheck access.log','всё, <b>кроме</b> строк с healthcheck'],['grep -c " 404 " access.log','только число совпадений'],['grep -n error app.log','с номерами строк'],['grep -r "listen 80" /etc/nginx/','рекурсивно по папке'],['grep -A 5 -B 2 Exception app.log','2 строки до и 5 после — увидеть контекст'],['grep -E "500|502|503" access.log','несколько вариантов (расширенные регулярки)'],['grep -o "GET [^ ]*" access.log','вывести только совпавший кусок'],['zgrep " 500 " access.log.2.gz','искать в сжатом логе']])}
+${BOX('Регулярные выражения — минимум','<p>grep, sed и awk ищут по <b>шаблонам</b>: <code>^</code> — начало строки, <code>$</code> — конец, <code>.</code> — любой символ, <code>*</code> — предыдущее сколько угодно раз, <code>[0-9]</code> — одна цифра, <code>[^ ]</code> — любой символ, кроме пробела. <code>^#</code> — строки-комментарии, <code>^$</code> — пустые строки. Пример: <code>grep -v -E "^#|^$" nginx.conf</code> — конфиг без комментариев и пустых строк.</p>','deep')}
+<h2>cut, sort, uniq, wc — столбцы и подсчёт</h2>
+${CMDS([['cut -d" " -f1 access.log','первое поле при делении по пробелу (IP)'],['cut -d: -f1 /etc/passwd','имена пользователей'],['sort file','по алфавиту'],['sort -n','как числа (иначе 10 &lt; 9)'],['sort -rn','числа по убыванию'],['sort -h','понимает 1K, 2M, 3G (для du -h)'],['sort -k2 -n','по второму столбцу'],['uniq','схлопнуть <b>соседние</b> повторы'],['uniq -c','и посчитать, сколько раз'],['sort -u','отсортировать и оставить уникальные'],['wc -l','строки (-w слова, -c байты)']])}
+<p><mark>uniq видит только соседние одинаковые строки</mark>, поэтому перед ним всегда <code>sort</code>.</p>
+<h2>awk — столбцы с условиями и арифметикой</h2>
+<p>awk делит каждую строку на поля <code>$1, $2, …</code> (по пробелам; другой разделитель — <code>-F</code>), <code>$0</code> — вся строка, <code>NF</code> — число полей. Программа: <code>условие { действие }</code>.</p>
+${C(`awk '{print $1}' access.log                 # IP
+awk '$9 == 500' access.log                  # только строки с кодом 500
+awk '$9 >= 500 {print $1, $7}' access.log   # IP и путь для всех 5xx
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd # обычные пользователи
+awk '{s += $10} END {print s/1024/1024 " MB"}' access.log   # трафик за файл`)}
+<h2>sed — найти и заменить</h2>
+${C(`sed 's/http:/https:/' file           # заменить первое вхождение в каждой строке
+sed 's/http:/https:/g' file          # g — все вхождения
+sed -i 's/^port=.*/port=9090/' app.conf   # -i — прямо в файле!
+sed -i.bak 's/a/b/g' app.conf        # то же, но сохранить копию app.conf.bak
+sed -n '100,120p' big.log            # показать строки 100–120
+sed '/^#/d' nginx.conf               # удалить строки-комментарии (в выводе)`)}
+<h2>Главный приём: «топ» чего угодно</h2>
+${C(`awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -10`)}
+<p>Читаем по шагам: вырезать IP → отсортировать (чтобы одинаковые оказались рядом) → посчитать повторы → отсортировать по числу по убыванию → первые 10. Меняешь <code>$1</code> на <code>$9</code> — топ кодов ответа, на <code>$7</code> — топ страниц. Это самый частый однострочник на собеседованиях и инцидентах.</p>`,
+memo:`<p>Возьми любой реальный лог (или сгенерируй в лабе) и задай ему 5 вопросов: сколько всего запросов, сколько 5xx, топ-10 IP, топ-10 страниц с ошибкой 404, в какую минуту было больше всего запросов. Каждый ответ — одна строка из пайпов. Собирай её по одному звену и смотри промежуточный вывод через <code>| head</code>.</p>`,
+traps:[
+ ['sort | uniq -c без sort: awk … | uniq -c','awk … | sort | uniq -c','uniq схлопывает только соседние строки. Без сортировки один IP посчитается много раз кусками.'],
+ ['sort -r для чисел из uniq -c','sort -rn','Без -n сортировка по тексту: «9» окажется выше «10», «100».'],
+ ['grep 500 access.log — «это ошибки 500»','awk \'$9 == 500\' access.log','grep 500 найдёт и размер 1500 байт, и время 10:15:00, и /page500. Точнее — сравнивать именно поле кода.'],
+ ['sed -i … сразу на проде','Сначала sed без -i (смотришь результат), потом sed -i.bak','-i меняет файл без подтверждения. Ошибка в выражении испортит конфиг, а бэкапа не будет.'],
+ ['grep по access.log, а нужные данные во вчерашнем access.log.2.gz','zgrep … access.log*  или  zcat access.log.*.gz | grep …','После ротации старые логи сжаты. Обычный grep по .gz ищет в бинарных данных.']],
+ex:[
+ {t:'c',q:'Что делает nginx?',o:['Принимает HTTP-запросы и отдаёт файлы или передаёт запрос приложению','Хранит данные как база данных','Планирует задачи по расписанию','Управляет пакетами'],a:0,e:'Nginx — веб-сервер и обратный прокси: «вход» сайта.'},
+ {t:'c',q:'В строке combined-лога nginx код ответа — это поле номер…',o:['9','1','7','4'],a:0,e:'$1 IP, $4–$5 время, $6–$8 запрос, $9 код, $10 байты.'},
+ {t:'c',q:'Что делает <code>grep -v healthcheck</code>?',o:['Показывает все строки, КРОМЕ содержащих healthcheck','Показывает только healthcheck','Считает healthcheck','Ищет без учёта регистра'],a:0,e:'-v — инвертировать отбор. Удобно убрать шум от проверок балансировщика.'},
+ {t:'c',q:'Почему перед <code>uniq -c</code> ставят <code>sort</code>?',o:['uniq схлопывает только соседние одинаковые строки','sort ускоряет uniq','Без sort uniq не запустится','Чтобы убрать пустые строки'],a:0,e:'Одинаковые строки должны стоять рядом — это и делает sort.'},
+ {t:'c',q:'<code>sort</code> без флагов выдал 10, 100, 9. Что добавить?',o:['-n','-r','-u','-k'],a:0,e:'-n — числовая сортировка. Без неё строки сравниваются посимвольно.'},
+ {t:'c',q:'Что делает <code>sed -i</code>?',o:['Меняет файл прямо на месте','Выводит результат без изменения файла','Ищет без учёта регистра','Показывает номера строк'],a:0,e:'Без -i sed печатает результат в stdout, а файл не трогает.'},
+ {t:'c',q:'Что выведет <code>awk -F: \'{print $1}\' /etc/passwd</code>?',o:['Имена всех пользователей','Пароли','UID','Домашние папки'],a:0,e:'-F: — разделитель двоеточие. Первое поле в /etc/passwd — имя.'},
+ {t:'i',q:'Впиши: посчитать количество строк в <code>access.log</code>.',a:['wc -l access.log','wc -l < access.log','cat access.log | wc -l'],ph:'wc …',e:'wc -l — число строк = число запросов.'},
+ {t:'i',q:'Впиши: вывести только IP (первое поле) из <code>access.log</code> через cut.',a:['cut -d" " -f1 access.log',"cut -d' ' -f1 access.log",'cut -d " " -f1 access.log',"cut -d ' ' -f1 access.log",'cut -f1 -d" " access.log'],ph:'cut …',e:'-d — разделитель, -f — номер поля.'},
+ {t:'i',q:'Впиши: найти строки с <code>Exception</code> в <code>app.log</code> и показать по 3 строки после каждой.',a:['grep -A 3 Exception app.log','grep -A3 Exception app.log','grep -A 3 "Exception" app.log','grep -A3 "Exception" app.log'],ph:'grep …',e:'-A — after, -B — before, -C — вокруг. Стектрейс обычно ниже строки с исключением.'},
+ {t:'i',q:'Впиши awk: показать только строки <code>access.log</code>, где код ответа равен 404.',a:["awk '$9 == 404' access.log","awk '$9==404' access.log","awk '$9 == \"404\"' access.log","awk '$9 == 404 {print}' access.log","awk '$9==404 {print $0}' access.log"],ph:"awk '…' access.log",e:'Условие без действия печатает строку целиком.'},
+ {t:'i',q:'Впиши sed: заменить во всём файле <code>app.conf</code> все <code>localhost</code> на <code>db</code>, прямо в файле, сохранив копию <code>.bak</code>.',a:["sed -i.bak 's/localhost/db/g' app.conf",'sed -i.bak "s/localhost/db/g" app.conf'],ph:'sed …',e:'-i.bak — правка на месте с бэкапом, g — все вхождения в строке.'},
+ {t:'s',q:'Собери «топ-10 IP по числу запросов».',p:["awk '{print $1}' access.log",'| sort','| uniq -c','| sort -rn','| head -10'],e:'Вырезать → сгруппировать → посчитать → упорядочить по числу → первые 10.'},
+ {t:'r',q:'Какой IP сделал больше всего запросов?',code:`$ awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -3
+   8812 198.51.100.23
+    412 203.0.113.7
+     97 192.0.2.44`,lang:'term',o:['198.51.100.23 — 8812 запросов','203.0.113.7','192.0.2.44','Нельзя сказать'],a:0,e:'uniq -c ставит число слева. 8812 против сотен — похоже на бота или атаку.'},
+ {t:'r',q:'Что произошло с этим запросом?',code:`10.0.0.5 - - [25/Nov/2026:09:01:12 +0300] "POST /api/pay HTTP/1.1" 502 157 "-" "Mozilla/5.0"`,lang:'out',o:['Ошибка 502: nginx не получил нормальный ответ от приложения','Успешная оплата','Страница не найдена','Клиент отменил запрос'],a:0,e:'5xx — проблема на сервере. 502 Bad Gateway — nginx как прокси не смог получить ответ от приложения (упало, не слушает порт). Причину ищем в error.log.'},
+ {t:'r',q:'Почему результат подсчёта неверный?',code:`$ awk '{print $9}' access.log | uniq -c
+   3 200
+   1 404
+   5 200
+   2 500
+   4 200`,lang:'term',o:['Нет sort перед uniq — 200 посчитано кусками','awk неверно выбрал поле','uniq -c не умеет считать','Лог повреждён'],a:0,e:'uniq склеил только соседние строки. Нужно … | sort | uniq -c.'},
+ {t:'c',g:'prac',q:'Ты ищешь ответы 500 командой <code>grep 500 access.log</code>, и в выдаче много строк с кодом 200. Почему?',o:['500 встречается в других полях: размер, время, путь','grep сломан','Логи перемешаны','Нужно grep -i'],a:0,e:'grep ищет подстроку в любом месте. Точно: awk \'$9 == 500\' или хотя бы grep " 500 ".'},
+ {t:'c',g:'prac',q:'Как посмотреть конфиг nginx без комментариев и пустых строк?',o:['grep -v -E "^#|^\\s*$" nginx.conf','grep "#" nginx.conf','cut -d# -f1 nginx.conf | sort','sed -i "/#/d" nginx.conf'],a:0,e:'-v с шаблоном «начинается с # или пустая». Последний вариант испортит файл (-i) и удалит строки, где # в середине.'},
+ {t:'i',g:'prac',q:'Впиши: сколько всего ответов с кодом 5xx (500–599) в access.log? Одной строкой, через awk и wc.',a:["awk '$9 >= 500' access.log | wc -l","awk '$9 ~ /^5/' access.log | wc -l","awk '$9>=500' access.log | wc -l","awk '$9 >= 500 && $9 < 600' access.log | wc -l"],ph:"awk …",e:'Условие на поле кода, потом подсчёт строк. Можно и без wc: awk \'$9>=500{n++} END{print n}\'.'},
+ {t:'i',g:'prac',fix:true,q:'Исправь: должна вывести топ страниц, но выводит странный порядок (сначала 9, потом 87, потом 1200).',code:"awk '{print $7}' access.log | sort | uniq -c | sort -r | head",a:["awk '{print $7}' access.log | sort | uniq -c | sort -rn | head","awk '{print $7}' access.log | sort | uniq -c | sort -nr | head"],ph:'awk …',e:'Числа из uniq -c надо сортировать численно: sort -rn.'},
+ {t:'s',g:'job',q:'Сайт начал отдавать 502. Собери порядок разбора по логам.',p:["Сколько и с какого времени: awk '$9 == 502' access.log | head","На какие адреса: awk '$9 == 502 {print $7}' access.log | sort | uniq -c | sort -rn","Почему — в error.log: tail -n 50 /var/log/nginx/error.log","Проверить само приложение (его лог / жив ли процесс)"],e:'Масштаб → что затронуто → причина со стороны nginx → причина в приложении.'},
+ {t:'c',g:'job',q:'Тимлид: «Вчера ночью был всплеск 404, глянь». Сегодняшний <code>access.log</code> чистый. Где искать?',o:['В ротированных логах: access.log.1 и access.log.N.gz (через zgrep/zcat)','В error.log','В /etc/nginx','Логи за вчера уже удалены'],a:0,e:'logrotate каждую ночь сдвигает файлы. Вчера — access.log.1, раньше — сжатые .gz.'},
+ {t:'c',g:'job',q:'Нужно поменять порт в 30 конфигах <code>/etc/app/*.conf</code> с 8080 на 9090. Что разумно?',o:['Сначала sed без -i на один файл посмотреть, потом sed -i.bak \'s/8080/9090/g\' /etc/app/*.conf','Открыть каждый в редакторе','sed -i \'s/8080/9090/\' /etc/*','rm и создать заново'],a:0,e:'Проверить выражение на сухую → массовая правка с бэкапами. Вариант с /etc/* заденет всё подряд.'}],
+lab:[
+ {t:'Сгенерируй учебный лог nginx на 5000 строк (скрипт в решении — сначала попробуй прочитать и понять его сам, это повторение пайпов и awk). Потом ответь одной строкой на каждый вопрос: всего запросов; сколько 5xx; топ-5 IP; топ-5 страниц с 404; какой процент запросов — ошибки 5xx.',h:'<p>Для процента в awk есть END: <code>awk \'{n++} $9>=500{e++} END{print e/n*100}\'</code>.</p>',sol:C(`for i in $(seq 5000); do
+  ip="10.0.0.$((RANDOM % 20))"; code=$(shuf -n1 -e 200 200 200 200 301 404 404 500 502)
+  path=$(shuf -n1 -e / /login /api/orders /api/pay /static/app.js /admin)
+  echo "$ip - - [25/Nov/2026:10:$((RANDOM%60)):00 +0300] \\"GET $path HTTP/1.1\\" $code $((RANDOM%5000)) \\"-\\" \\"curl/8.5\\""
+done > ~/lab/access.log
+
+wc -l ~/lab/access.log
+awk '$9 >= 500' ~/lab/access.log | wc -l
+awk '{print $1}' ~/lab/access.log | sort | uniq -c | sort -rn | head -5
+awk '$9 == 404 {print $7}' ~/lab/access.log | sort | uniq -c | sort -rn | head -5
+awk '{n++} $9>=500{e++} END{printf "%.1f%%\\n", e/n*100}' ~/lab/access.log`)},
+ {t:'Докажи себе ловушки: на том же логе сравни <code>grep -c 500</code> и <code>awk \'$9==500\' | wc -l</code>; сравни <code>uniq -c</code> с <code>sort</code> и без; <code>sort -r</code> и <code>sort -rn</code> на выводе uniq -c. Запиши, где и почему разошлось.'},
+ {t:'Безопасная правка конфига: скопируй <code>/etc/ssh/sshd_config</code> (или любой конфиг) в <code>~/lab</code>, выведи его без комментариев и пустых строк, затем через sed поменяй <code>#Port 22</code> на <code>Port 2222</code> — сначала без -i, потом с <code>-i.bak</code>. Проверь <code>diff</code> между файлом и .bak.',sol:C(`cp /etc/ssh/sshd_config ~/lab/sshd_config 2>/dev/null || cp /etc/ssh/ssh_config ~/lab/sshd_config
+grep -v -E "^#|^\\s*$" ~/lab/sshd_config
+sed 's/^#Port 22/Port 2222/' ~/lab/sshd_config | grep Port
+sed -i.bak 's/^#Port 22/Port 2222/' ~/lab/sshd_config
+diff ~/lab/sshd_config.bak ~/lab/sshd_config`)},
+ {t:'Найди в <code>/etc/passwd</code> всех пользователей, у которых есть настоящая оболочка (не nologin и не false), и выведи имя и оболочку. Затем — всех с UID ≥ 1000.',sol:C(`grep -v -E "nologin|false" /etc/passwd | cut -d: -f1,7
+awk -F: '$3 >= 1000 {print $1, $3}' /etc/passwd`)}],
+qa:[
+ ['Как найти топ IP по запросам в логе nginx?',"awk '{print $1}' access.log | sort | uniq -c | sort -rn | head. Вырезать поле → сгруппировать → посчитать → по убыванию."],
+ ['Почему uniq используют после sort?','uniq схлопывает только подряд идущие одинаковые строки. sort ставит одинаковые рядом.'],
+ ['Чем grep отличается от awk?','grep отбирает строки по шаблону. awk работает с полями: условия на конкретный столбец, вывод нужных столбцов, арифметика и итоги в END.'],
+ ['Как sed заменить текст в файле безопасно?',"Сначала без -i посмотреть результат, потом sed -i.bak 's/old/new/g' file — правка на месте с резервной копией."],
+ ['Что в строке access.log nginx?','IP, время, запрос (метод, путь, протокол), код ответа, размер, referer, user agent. Ошибки самого nginx — в error.log.'],
+ ['Чем отличаются 4xx и 5xx?','4xx — ошибка клиента (404 нет страницы, 403 запрещено, 401 не авторизован). 5xx — ошибка сервера (500 упало приложение, 502 прокси не получил ответ, 504 таймаут).'],
+ ['Как искать в старых сжатых логах?','zgrep, zcat, zless работают с .gz без распаковки: zgrep " 500 " access.log.*.gz.']],
+cheat:[["awk '{print $1}' log | sort | uniq -c | sort -rn | head",'топ значений поля'],['grep -v x','всё, кроме x'],['grep -c x','сколько строк с x'],['grep -A 5 -B 2 x','контекст вокруг'],['grep -E "a|b"','несколько вариантов'],['grep -r x /etc/nginx/','рекурсивно'],['zgrep x log.gz','в сжатом логе'],['cut -d: -f1 /etc/passwd','поле по разделителю'],['sort -rn','числа по убыванию'],['sort -h','1K/2M/3G'],["awk '$9 >= 500' access.log",'условие на столбец'],["awk -F: '{print $1}'",'другой разделитель'],["sed -i.bak 's/a/b/g' f",'замена в файле с бэкапом'],["sed -n '10,20p' f",'строки 10–20'],['wc -l','число строк']]});
 /* Единственный источник порядка. Модуль, которого ещё нет в src/modules, просто пропускается. */
 const LEVELS=[
   {id:'L1',name:'Linux-база',ids:['linux','shell','files','perms','streams','text','procs','r1','res','systemd','pkgs','bash1','bash2','pwsh','net1','r2','dns','ssh','fw','nginx','git']},
@@ -723,6 +837,37 @@ const LEVELS=[
   {id:'L5',name:'Собес',ids:[]}];
 const ORDER=LEVELS.flatMap(l=>l.ids.filter(id=>MODS[id]).map(id=>(MODS[id].lvl=MODS[id].lvl||l.id,id)));
 const PASS=0.6; /* порог открытия следующего модуля */
+/* Словарь инструментов. Если инструмент встречается в модуле РАНЬШЕ своего модуля (m),
+   движок сам покажет вверху модуля короткое объяснение (d). Раздел «Словарь» (#terms) — все сразу.
+   k — ключ, n — название, re — как искать в тексте модуля, d — что это и зачем (1–3 предложения), m — id модуля, где разобрано подробно. */
+const TERMS=[
+ {k:'nginx',n:'Nginx',re:/nginx/i,m:'nginx',d:'Веб-сервер: принимает HTTP-запросы из интернета, сам отдаёт файлы сайта (картинки, HTML) или передаёт запрос твоему приложению. Стоит «на входе» почти любого сайта. На каждый запрос пишет строку в лог <code>/var/log/nginx/access.log</code>, ошибки — в <code>error.log</code>.'},
+ {k:'http',n:'HTTP и коды ответа',re:/HTTP|\b(?:403|404|500|502)\b/,m:'dns',d:'Протокол, по которому браузер разговаривает с сайтом: запрос (GET /page) → ответ с кодом. 2xx — успех (200 OK), 3xx — перенаправление, 4xx — ошибка клиента (404 не найдено, 403 запрещено), 5xx — ошибка сервера (500, 502).'},
+ {k:'docker',n:'Docker и контейнер',re:/docker|контейнер/i,m:'docker',d:'Docker запускает приложения в <b>контейнерах</b> — изолированных процессах со своим набором файлов (образом). Контейнер легче виртуальной машины: у него нет своего ядра, он использует ядро хоста.'},
+ {k:'compose',n:'Docker Compose',re:/compose/i,m:'compose',d:'Запуск нескольких контейнеров (приложение + база + nginx) одной командой по описанию в файле <code>docker-compose.yml</code>.'},
+ {k:'cron',n:'cron',re:/cron/i,m:'bash2',d:'Планировщик: запускает команды по расписанию. Строка <code>0 3 * * * /opt/backup.sh</code> = «каждый день в 3:00». Вывод заданий никто не видит, поэтому его перенаправляют в лог.'},
+ {k:'logrotate',n:'logrotate и ротация логов',re:/logrotate|ротац/i,m:'text',d:'Чтобы логи не съели диск, их «ротируют»: раз в сутки <code>access.log</code> переименовывается в <code>access.log.1</code>, старые сжимаются (<code>.gz</code>) и удаляются, а приложение пишет в новый пустой файл.'},
+ {k:'systemd',n:'systemd / systemctl',re:/systemd|systemctl|unit-файл/i,m:'systemd',d:'Система, которая запускает и следит за сервисами: стартует nginx при загрузке, перезапускает упавшее приложение. Управление — <code>systemctl start|stop|restart|status имя</code>.'},
+ {k:'journalctl',n:'journalctl',re:/journalctl/i,m:'systemd',d:'Чтение журнала systemd — логов всех сервисов в одном месте. <code>journalctl -u nginx</code> — логи сервиса nginx.'},
+ {k:'cicd',n:'CI/CD и пайплайн',re:/\bCI\b|CI\/CD|пайплайн|pipeline/i,m:'gitlabci',d:'Автоматизация: при каждом push сервер сборки сам собирает код, гоняет тесты (CI) и выкатывает на сервер (CD). Шаги описываются в файле, например <code>.gitlab-ci.yml</code>. Шаг (job) падает, если команда вернула ненулевой код.'},
+ {k:'git',n:'Git',re:/\bgit\b/i,m:'git',d:'Система контроля версий: хранит историю изменений кода. <code>git pull</code> — забрать свежие изменения с сервера, <code>git push</code> — отправить свои.'},
+ {k:'ssh',n:'SSH',re:/\bssh\b/i,m:'ssh',d:'Защищённое подключение к удалённому серверу: <code>ssh user@host</code> даёт терминал на сервере. Вход по паролю или по ключу (пара файлов: приватный у тебя, публичный на сервере).'},
+ {k:'curl',n:'curl',re:/curl/i,m:'net1',d:'Консольный HTTP-клиент: отправляет запрос и показывает ответ. <code>curl http://localhost:8080</code> — «открыть страницу» без браузера; удобно проверять, жив ли сервис.'},
+ {k:'k8s',n:'Kubernetes',re:/kubernetes|k8s|kubectl/i,m:'k8sarch',d:'Оркестратор: управляет сотнями контейнеров на многих серверах, сам перезапускает упавшие, распределяет нагрузку, обновляет без простоя.'},
+ {k:'postgres',n:'PostgreSQL',re:/postgres/i,m:'sql',d:'Популярная база данных. Работает как сервис от системного пользователя <code>postgres</code>, данные хранит в <code>/var/lib/postgresql</code>.'},
+ {k:'wsl',n:'WSL',re:/\bWSL\b/,m:'linux',d:'Windows Subsystem for Linux — настоящая Ubuntu внутри Windows. Ставится одной командой <code>wsl --install</code>; самый быстрый способ получить полигон.'},
+ {k:'vps',n:'VPS / VM',re:/\bVPS\b|VirtualBox|виртуальн/i,m:'ctr',d:'Виртуальная машина — программная имитация компьютера со своей ОС. VPS — такая машина в аренду в дата-центре, с постоянным IP. VirtualBox — программа для VM на своём компьютере.'},
+ {k:'apt',n:'apt / dnf / apk',re:/\bapt\b|\bdnf\b|\bapk\b/,m:'pkgs',d:'Менеджеры пакетов — «магазин приложений» в консоли: <code>apt install nginx</code> скачивает и ставит программу со всеми зависимостями. apt — Ubuntu/Debian, dnf — RHEL, apk — Alpine.'},
+ {k:'sysctl',n:'sysctl',re:/sysctl/i,m:'res',d:'Настройки ядра «на лету» (размер буферов сети, swappiness и т. п.). Постоянные значения кладут в <code>/etc/sysctl.d/*.conf</code>.'},
+ {k:'npm',n:'npm / make',re:/\bnpm\b|\bmake\b/,m:'gitlabci',d:'Инструменты сборки. <code>npm test</code> — запустить тесты проекта на Node.js, <code>make</code> — выполнить шаги сборки из Makefile. В модулях они — просто пример «долгой команды с выводом».'},
+ {k:'pwsh',n:'PowerShell',re:/powershell|pwsh|\.ps1/i,m:'shell',d:'Оболочка Windows (есть и для Linux — <code>pwsh</code>). В отличие от bash передаёт по пайпам объекты, а не текст. Скрипты — файлы <code>.ps1</code>.'},
+ {k:'regex',n:'Регулярные выражения',re:/регуляр|regex/i,m:'text',d:'Шаблоны для поиска текста: <code>^</code> — начало строки, <code>$</code> — конец, <code>.</code> — любой символ, <code>*</code> — повторить сколько угодно раз, <code>[0-9]</code> — цифра.'}];
+const termIdx=k=>ORDER.indexOf(k);
+/* Какие инструменты модуль упоминает раньше их собственного модуля */
+function earlyTerms(id){const m=MODS[id],i=ORDER.indexOf(id);
+  const txt=[m.intro,m.theory,m.memo,JSON.stringify(m.traps),JSON.stringify(m.ex),JSON.stringify(m.lab),JSON.stringify(m.qa)].join(' ').replace(/<[^>]+>/g,' ');
+  return TERMS.filter(t=>t.m!==id&&t.re.test(txt)&&(LEVELS.flatMap(l=>l.ids).indexOf(t.m)>LEVELS.flatMap(l=>l.ids).indexOf(id)))}
+const termHTML=t=>`<div class="term"><b>${t.n}</b> — ${t.d} <span class="muted">${MODS[t.m]?`→ <a href="#m-${t.m}">подробно: ${MODS[t.m].title}</a>`:'→ подробно в своём модуле (в работе)'}</span></div>`;
 /* Задания. Общие поля: t (тип), q (вопрос, html), e (почему — обязательно), g (группа), ref (id прошлой темы для ↺), code+lang (блок кода).
    t:'c'  выбор       {o:[варианты], a:индекс верного}        — варианты перемешиваются
    t:'r'  чтение      то же, что 'c', но с логом/конфигом в code
@@ -760,7 +905,7 @@ const groupOf=x=>x.ref?'mix':x.g||'base';
 const plain=s=>String(s).replace(/<[^>]+>/g,'');
 
 function side(cur){
-  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
+  $('#side').innerHTML=`<a class="sl${!cur?' cur':''}" href="#home">⌂ Главная</a><a class="sl" href="#qa">🎴 Собес каждый день</a><a class="sl" href="#cheat">📋 Шпаргалка</a><a class="sl" href="#terms">📖 Словарь инструментов</a><a class="sl" href="#todo">🗒 Надо разобрать <span class="cnt">${P.todo.length||''}</span></a>`+
   LEVELS.filter(l=>l.ids.some(id=>MODS[id])).map(l=>`<details open><summary>${l.id} · ${l.name}</summary>${l.ids.filter(id=>MODS[id]).map(id=>{const m=MODS[id],s=score(id),u=unlocked(id);
     return `<a class="sl${m.review?' rev':''}${cur===id?' cur':''}" href="#m-${id}">${u?'':'🔒 '}${ORDER.indexOf(id)+1}. ${m.title}<span class="pg" style="--p:${s.pct*100|0}%"></span></a>`}).join('')}</details>`).join('')}
 
@@ -778,6 +923,8 @@ function modView(id,tab){
     .filter(([k])=>(k!=='lab'||m.lab.length)&&(k!=='qa'||m.qa.length)&&(k!=='theory'||m.theory));
   if(!tabs.some(t=>t[0]===tab))tab=tabs[0][0];
   let h=`<div class="mh"><span class="lv">${m.review?'Обзор':m.lvl} · модуль ${i+1}</span><h1>${m.title}</h1><p class="sub">${m.sub||''}</p></div><nav class="tabs">${tabs.map(([k,n])=>`<a class="${k===tab?'on':''}" href="#m-${id}-${k}">${n}</a>`).join('')}</nav>`;
+  const early=earlyTerms(id);const earlyBox=early.length?`<details class="early"${tab==='theory'?' open':''}><summary>Встретятся инструменты, которые ещё не проходили (${early.length}) — коротко, что это</summary>${early.map(termHTML).join('')}</details>`:'';
+  if(tab==='theory'||tab==='ex'||tab==='lab')h+=earlyBox;
   if(tab==='theory')h+=(m.intro?`<section class="intro"><h2>Что это и зачем</h2>${m.intro}</section>`:'')+`<section>${m.theory}</section>`+(m.memo?`<section><h2>Как тренировать</h2>${m.memo}</section>`:'')+(m.traps.length?`<section><h2>Ловушки</h2>${TR(m.traps)}</section>`:'');
   if(tab==='ex'){
     if(!u)return h+`<div class="lock">🔒 Практика откроется, когда в предыдущем модуле будет ${PASS*100}% верных. Теорию можно читать уже сейчас.<br><button class="force" data-id="${id}">Открыть без прохождения</button></div>`;
@@ -794,11 +941,12 @@ function cheat(){return `<h1>Шпаргалка</h1><input id="cs" class="inp wi
 function qaDaily(){const all=ORDER.filter(unlocked).flatMap(id=>MODS[id].qa.map(([q,a])=>[q,a,id]));
   return `<h1>Собес каждый день</h1><p class="sub">Пробегись глазами. Не знаешь — «В разобрать». Вопросы только из открытых модулей, порядок случайный.</p>`+
     shuffle(all).map(([q,a,id])=>`<details class="qa"><summary>${q}</summary><div>${a}<p class="muted">→ <a href="#m-${id}">${MODS[id].title}</a> · <button class="totodo" data-t="${esc(plain(q))}">В разобрать</button></p></div></details>`).join('')}
+function terms(){return `<h1>Словарь инструментов</h1><p class="sub">Коротко: что это и зачем. Подробно — в модуле по ссылке.</p>`+TERMS.map(termHTML).join('')}
 function todo(){return `<h1>Надо разобрать</h1><p class="sub">Сюда — всё, что не понял. Разобрал — отмечай ✓.</p><div class="inrow"><input id="tdi" class="inp" placeholder="Тема или команда"><button id="tda" class="go">Добавить</button></div><ul class="todo">${P.todo.map((t,k)=>`<li><span>${esc(t)}</span><button class="tdx" data-k="${k}">✓</button></li>`).join('')}</ul>`}
 
 function route(){
   let [a,id,tab]=location.hash.slice(1).split('-');a=a||'home';
-  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():home();
+  $('#main').innerHTML=a==='m'?modView(id,tab):a==='cheat'?cheat():a==='qa'?qaDaily():a==='todo'?todo():a==='terms'?terms():home();
   side(a==='m'?id:null);document.body.classList.remove('menu');scrollTo(0,0)}
 addEventListener('hashchange',route);
 
