@@ -85,6 +85,7 @@ ${tbl(['bash','PowerShell'],[
  ['<code>df -h</code>','<code>Get-Volume</code> / <code>Get-PSDrive</code>'],
  ['<code>cmd &gt; f 2&gt;&amp;1</code>','<code>cmd *&gt; f</code> (все потоки)'],
  ['<code>ssh host cmd</code>','<code>Invoke-Command -ComputerName host { cmd }</code> (WinRM) или ssh в PS 7']])}
+<p><b>WinRM</b> (Windows Remote Management) — встроенная в Windows служба удалённого управления, «SSH для Windows»: через неё PowerShell выполняет команды на других машинах. Работает на портах 5985 (HTTP) и 5986 (HTTPS), включается командой <code>Enable-PSRemoting</code>; в доменной сети вход идёт под учёткой Active Directory — общей базы пользователей и компьютеров компании.</p>
 <p>В Windows PowerShell 5.1 <code>curl</code> и <code>wget</code> — <mark>алиасы</mark> Invoke-WebRequest с другими флагами. Настоящий curl — <code>curl.exe</code>.</p>
 <h2>Где пригодится с MS SQL</h2>
 <p>Модуль <b>dbatools</b> (<code>Install-Module dbatools -Scope CurrentUser</code>) — сотни командлетов для администрирования SQL Server: <code>Get-DbaDatabase</code>, <code>Backup-DbaDatabase</code>, <code>Test-DbaLastBackup</code> (проверить, что бэкап реально восстанавливается). Его используют DBA и DevOps по всему миру — пригодится в проекте.</p>`,
